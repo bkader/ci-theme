@@ -7,10 +7,6 @@ There are several files to be put so this library would work:
 2. **_theme.php_** config file inside ./application/config/
 3. **_MY_Config.php_** files to put insie ./application/core/
 
-I have added a controller **Asset** to be put inside controllers folder and don't forget to add the following routes so it would work:
-`$route['(assets|uploads)']      = 'asset';`
-`$route['(assets|uploads)/(.+)'] = 'asset/$1';`
-
 ## How To Install?
 Simply drap and drop all given files, do some changes and voilà, tout est prêt :), everything is set.
 
