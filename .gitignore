@@ -1,9 +1,7 @@
 # remove application files & folder
-*
 !.gitignore
 !LICENSE
 !README.md
-!content
 application/cache/*
 application/config/*
 !application/config/theme.php
@@ -26,6 +24,9 @@ application/views/*
 
 # remove system files & folder
 system/*
+
+# Keepin content folder
+!content/*
 
 ## Sublime Text cache files
 *.tmlanguage.cache
