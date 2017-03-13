@@ -1,14 +1,10 @@
 # CI-Theme - CodeIgniter Themes
 I tried a lot of templates and themes libraries and I was satisfy with them but I decided to make my own, as simple as it can get. So here is my library, free to use, like **CodeIgniter**.
 ## What's CI-Theme?
-CI-Theme is a library that helps you make your CodeIgniter application theme-able :D
-There are several files to be put so this library would work:
-1. **_Theme.php_** library files inside ./application/libraries/
-2. **_theme.php_** config file inside ./application/config/
-3. **_MY_Config.php_** files to put insdie ./application/core/
+CI-Theme is a library that helps you make your CodeIgniter application theme-able :D. Just download it, drop files into their respective folders (__content__ folder is public). Voilà.
 
 ## How To Install?
-Simply drop all given files, do some changes and voilà, tout est prêt :), everything is set.
+As I said above, simply drop all given files, configure and voilà, tout est prêt :), everything is set.
 
 ## What to do after?
 You are given a folder names **content** inside which you haves **theme** and **uploads**. All your themes files go under _content/themes__ (simply follow the example of the **default** theme)
