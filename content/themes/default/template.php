@@ -5,11 +5,11 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title><?php echo @$title; ?></title>
-	<?php echo $meta; ?>
+	<?php echo @$metadata; ?>
 
 	<!-- StyleSheets -->
 	<?php echo css('bootstrap.min', 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css'); ?>
-	<?php echo $css_files; ?>
+	<?php echo @$css_files; ?>
 
 	<!--[if lt IE 9]>
 		<?php echo js('html5shiv.min', 'https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js', NULL, 'common'); ?>
@@ -25,6 +25,6 @@
 	<!-- JavaScripts -->
 	<?php echo js('jquery.min', 'http://code.jquery.com/jquery.min.js', NULL, 'common'); ?>
 	<?php echo js('bootstrap.min', 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js'); ?>
-	<?php echo $js_files."\n"; ?>
+	<?php echo @$js_files."\n"; ?>
 </body>
 </html>

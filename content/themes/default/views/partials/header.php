@@ -8,7 +8,7 @@
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span>
 			</button>
-			<a class="navbar-brand" href="<?=@$site_url?>"><?=@$site_name?></a>
+			<a class="navbar-brand" href="<?php echo site_url(); ?>?>"><?php echo @$site_name; ?></a>
 		</div><!--/.navbar-header-->
 
 		<!-- Collect the nav links, forms, and other content for toggling -->
@@ -29,7 +29,7 @@
 				</li>
 			</ul><!--/.nav-->
 
-			<form action="<?php echo site_url('example'); ?>" class="navbar-form navbar-left" role="search" method="get">
+			<form action="#" class="navbar-form navbar-left">
 				<div class="form-group">
 					<input type="text" name="name" class="form-control" placeholder="Search">
 				</div><!--/.form-group-->

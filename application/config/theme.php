@@ -18,15 +18,23 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | Theme Settings
 | -------------------------------------------------------------------
 |
-|  'theme.theme' 		the activated site theme
-|  'theme.layout' 		theme default layout file
-|  'theme.title_sep' 	string to be used as title separator
-|  'theme.minify' 		whether to compress HTML output to not
+|  'theme.theme' 			the activated site theme.
+|  'theme.master' 			theme default master view file.
+|  'theme.layout' 			theme default layout file.
+|  'theme.title_sep' 		string to be used as title separator.
+|  'theme.compress' 		whether to compress HTML output to not.
+|  'theme.cache_lifetime' 	whether to cache output or not.
 |
+| CDN settings:
+|	'theme.cdn_enabled'		If TRUE, the 2nd param of css(), js() is used.
+|	'theme.cdn_server'		If your host your assets on a CDN, privide URL.
 */
 
 // Site default theme
 $config['theme']['theme'] = 'default';
+
+// Site default master view file.
+$config['theme']['master'] = 'template';
 
 // Site default layout file
 $config['theme']['layout'] = 'default';
@@ -35,7 +43,7 @@ $config['theme']['layout'] = 'default';
 $config['theme']['title_sep'] = '&#151;';
 
 // Minify HTML Output
-$config['theme']['minify'] = (defined('ENVIRONMENT') && ENVIRONMENT == 'production');
+$config['theme']['compress'] = (defined('ENVIRONMENT') && ENVIRONMENT == 'production');
 
 // Cache life time
 $config['theme']['cache_lifetime'] = 0; // 5 minutes
