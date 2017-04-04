@@ -8,7 +8,7 @@
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span>
 			</button>
-			<a class="navbar-brand" href="<?php echo site_url(); ?>?>"><?php echo @$site_name; ?></a>
+			<a class="navbar-brand" href="<?php echo site_url(); ?>"><?php echo @$site_title; ?></a>
 		</div><!--/.navbar-header-->
 
 		<!-- Collect the nav links, forms, and other content for toggling -->

@@ -8,23 +8,26 @@
 	<?php echo @$metadata; ?>
 
 	<!-- StyleSheets -->
-	<?php echo css('bootstrap.min', 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css'); ?>
+	<?php echo css('https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css'); ?>
 	<?php echo @$css_files; ?>
 
+	<?php echo js('https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js'); ?>
 	<!--[if lt IE 9]>
-		<?php echo js('html5shiv.min', 'https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js', NULL, 'common'); ?>
-		<?php echo js('respond.min', 'https://cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.min.js', NULL, 'common'); ?>
+	<?php echo js('https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js'); ?>
+	<?php echo js('https://cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.min.js'); ?>
 	<![endif]-->
-
-	<?php echo js('https://buttons.github.io/buttons.js', null, 'async defer'); ?>
 
 </head>
 <body>
 	<?php echo @$layout."\n"; ?>
 
 	<!-- JavaScripts -->
-	<?php echo js('jquery.min', 'http://code.jquery.com/jquery.min.js', NULL, 'common'); ?>
-	<?php echo js('bootstrap.min', 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js'); ?>
+	<?php echo js('http://code.jquery.com/jquery-1.12.4.min.js'); ?>
+	<?php echo js('https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js'); ?>
 	<?php echo @$js_files."\n"; ?>
+	
+	<!-- Feel free to remove this line because you don't need it -->
+	<script async defer src="https://buttons.github.io/buttons.js"></script>
+
 </body>
 </html>

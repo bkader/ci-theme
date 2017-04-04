@@ -11,5 +11,5 @@
 		<code>application/controllers/Welcome.php</code>
 
 		<p>If you are exploring CodeIgniter for the very first time, you should start by reading the <a href="https://www.codeigniter.com/user_guide/" target="_blank">User Guide</a>.</p>
-	</div>
+	</div><!--/.well-->
 </div><!--/.col-sm-8-->
