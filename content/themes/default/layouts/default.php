@@ -1,10 +1,9 @@
-<?php echo @$header; ?>
-
+<?php get_header(); ?>
 <div class="container">
+	<?php echo print_flash_alert(); ?>
 	<div class="row">
 		<?php echo @$content."\n"; ?>
-		<?php echo @$sidebar."\n"; ?>
+		<?php get_partial('sidebar'); ?>
 	</div><!--/.row-->
 </div><!-- /.container -->
-
-<?php echo @$footer; ?>
+<?php get_footer(); ?>

@@ -1,6 +1,8 @@
 <div class="col-xs-12 col-sm-8">
 	<h1 class="page-header" style="margin-top: 0;">Welcome to CodeIgniter!</h1>
-
+	
+	<?php echo print_alert('This is a dummy alert just to show you how to display an alert using <strong>print_alert()</strong> function.'); ?>
+	
 	<div class="well">
 		<p>The page you are looking at is being generated dynamically by CodeIgniter.</p>
 

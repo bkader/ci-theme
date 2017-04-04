@@ -23,9 +23,6 @@ class Welcome extends CI_Controller {
 		$this->theme
 			->title('Welcome')
 			->add_css('style')
-			->add_partial('header')
-			->add_partial('footer')
-			->add_partial('sidebar')
 			->load('welcome');
 	}
 }
