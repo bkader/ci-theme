@@ -1,4 +1,4 @@
-<div class="col-xs-12 col-sm-4">
+<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?><div class="col-xs-12 col-sm-4">
 	<div class="panel panel-default">
 		<div class="panel-body">
 			<p>This view is located in: <br><code><?php echo __FILE__; ?></code>.</p>

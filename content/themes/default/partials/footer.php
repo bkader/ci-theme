@@ -1,4 +1,4 @@
-<div class="navbar navbar-default navbar-fixed-bottom">
+<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?><div class="navbar navbar-default navbar-fixed-bottom">
 	<div class="container">
 		<p class="navbar-text pull-left">&copy; <?php echo date('Y'); ?> - <?php echo @$site_title; ?> <a href="https://github.com/bkader" target="_blank">@bkader</a> &bull; Page rendered in: <strong>{elapsed_time}</strong> seconds.
 		</p>

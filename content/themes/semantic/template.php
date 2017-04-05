@@ -1,4 +1,4 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="utf-8">
@@ -8,7 +8,7 @@
 	<?php echo @$metadata; ?>
 
 	<!-- StyleSheets -->
-	<?php echo css('https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css'); ?>
+	<?php echo css('https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.10/semantic.min.css'); ?>
 	<?php echo @$css_files; ?>
 
 	<?php echo js('https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js'); ?>
@@ -23,7 +23,7 @@
 
 	<!-- JavaScripts -->
 	<?php echo js('http://code.jquery.com/jquery-1.12.4.min.js'); ?>
-	<?php echo js('https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js'); ?>
+	<?php echo js('https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.10/semantic.min.js'); ?>
 	<?php echo @$js_files."\n"; ?>
 	
 	<!-- Feel free to remove this line because you don't need it -->

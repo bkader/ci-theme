@@ -77,9 +77,9 @@ if ( ! function_exists('css'))
      * @param   mixed   $attr   attributes to append to string
      * @return  string
      */
-    function css($file = NULL, $cdn = NULL, $attrs = '')
+    function css($file = NULL, $cdn = NULL, $attrs = '', $folder = NULL)
     {
-        return get_instance()->theme->css($file, $cdn, $attrs);
+        return get_instance()->theme->css($file, $cdn, $attrs, $folder);
     }
 }
 
@@ -205,7 +205,7 @@ if ( ! function_exists('img_alt'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('load_view'))
+if ( ! function_exists('theme_view'))
 {
     /**
      * Quick access to Theme::load() method.
@@ -216,7 +216,7 @@ if ( ! function_exists('load_view'))
      * @param   string  $master     in case you use a distinct master view
      * @return  void
      */
-    function load_view($view, $data = array(), $return = FALSE, $master = 'template')
+    function theme_view($view, $data = array(), $return = FALSE, $master = 'template')
     {
         return get_instance()->theme->load($view, $data, $return, $master);
     }
@@ -224,7 +224,7 @@ if ( ! function_exists('load_view'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('get_view'))
+if ( ! function_exists('load_view'))
 {
     /**
      * Displays a single view alone.
@@ -234,7 +234,7 @@ if ( ! function_exists('get_view'))
      * @param   bool    $return whether to return or output
      * @return  mixed
      */
-    function get_view($view, $data = array(), $return = FALSE)
+    function load_view($view, $data = array(), $return = FALSE)
     {
         return get_instance()->theme->view($view, $data, $return);
     }
@@ -242,7 +242,7 @@ if ( ! function_exists('get_view'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('get_partial'))
+if ( ! function_exists('theme_partial'))
 {
     /**
      * Insead of using Theme::partial() method, your can use this helper
@@ -253,7 +253,7 @@ if ( ! function_exists('get_partial'))
      * @param   bool    $return     whether to return it or not.
      * @return  mixed
      */
-    function get_partial($view, $data = array(), $return = FALSE)
+    function theme_partial($view, $data = array(), $return = FALSE)
     {
         return get_instance()->theme->partial($view, $data, $return);
     }
@@ -261,37 +261,37 @@ if ( ! function_exists('get_partial'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('get_header'))
+if ( ! function_exists('theme_header'))
 {
     /**
      * Loads partial view named 'header'. This can also been done using
-     * get_partial() function: get_partial('header', $data, $return)
+     * theme_partial() function: theme_partial('header', $data, $return)
      *
      * @param   array   $data       array of data to pass to the view.
      * @param   bool    $return     whether to return it or not.
      * @return  mixed
      */
-    function get_header($data = array(), $return = FALSE)
+    function theme_header($data = array(), $return = FALSE)
     {
-        return get_partial('header', $data, $return);
+        return theme_partial('header', $data, $return);
     }
 }
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('get_footer'))
+if ( ! function_exists('theme_footer'))
 {
     /**
      * Loads partial view named 'footer'. This can also been done using
-     * get_partial() function: get_partial('footer', $data, $return)
+     * theme_partial() function: theme_partial('footer', $data, $return)
      *
      * @param   array   $data   array of data to pass to the view.
      * @param   bool    $return     whether to return it or not.
      * @return  mixed
      */
-    function get_footer($data = array(), $return = FALSE)
+    function theme_footer($data = array(), $return = FALSE)
     {
-        return get_partial('footer', $data, $return);
+        return theme_partial('footer', $data, $return);
     }
 }
 
@@ -320,7 +320,7 @@ if ( ! function_exists('print_alert'))
             get_instance()->load->library('theme');
         }
 
-        return get_partial($view, array(
+        return theme_partial($view, array(
             'type' => $type, 
             'message' => $message
         ), TRUE);

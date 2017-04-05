@@ -2,6 +2,8 @@
 !.gitignore
 !LICENSE
 !README.md
+application/.htaccess
+application/index.html
 application/cache
 application/config/*
 !application/config/theme.php
@@ -18,8 +20,6 @@ application/logs
 application/models
 application/third_party
 application/views
-application/.htaccess
-application/index.html
 
 # remove system files & folder
 system

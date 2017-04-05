@@ -1,4 +1,4 @@
-<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?><nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
 	<div class="container">
 		<!-- Brand and toggle get grouped for better mobile display -->
 		<div class="navbar-header">
@@ -14,6 +14,7 @@
 		<!-- Collect the nav links, forms, and other content for toggling -->
 		<div class="collapse navbar-collapse navbar-ex1-collapse">
 			<ul class="nav navbar-nav">
+				<li><a href="<?php echo site_url('welcome/semantic'); ?>">Semantic Theme</a></li>
 				<li><a href="https://goo.gl/fZ5P94" target="_blank">GitHub</a></li>
 				<li><a href="http://www.codeigniter.com/" target="_blank">CodeIgniter</a></li>
 				<li><a href="https://goo.gl/wGXHO9" target="_blank">@kader</a></li>

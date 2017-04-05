@@ -1,0 +1,42 @@
+@charset "utf8";
+
+body {
+	background-color: #e6e6e6;
+	padding-top: 59px;
+}
+
+body>.ui.grid.container {
+	padding-top: 0 !important;
+}
+
+footer {
+	width: 100%;
+	background-color: #fff;
+	padding-top: 1rem;
+	border-top: 1px solid #ddd;
+	margin-top: 1rem;
+}
+
+@media (min-width: 768px) {
+	footer {
+		position: fixed;
+		left: 0;
+		bottom: 0;
+		z-index: 1051;
+	}
+}
+
+code,
+kbd,
+pre,
+samp {
+    font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
+}
+
+code {
+    padding: 2px 4px;
+    font-size: 90%;
+    color: #c7254e;
+    background-color: #f9f2f4;
+    border-radius: 4px;
+}
