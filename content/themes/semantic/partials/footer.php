@@ -6,8 +6,8 @@
 			</div><!--/.column-->
 			<div class="right aligned eight wide column">
 				<span class="navbar-text pull-right text-right">
-					<a class="github-button" href="https://github.com/bkader/ci-theme/subscription" data-icon="octicon-eye" data-style="mega" data-count-href="/bkader/ci-theme/watchers" data-count-api="/repos/bkader/ci-theme#subscribers_count" data-count-aria-label="# watchers on GitHub" aria-label="Watch bkader/ci-theme on GitHub">Watch</a>
-					<a class="github-button" href="https://github.com/bkader/ci-theme" data-icon="octicon-star" data-style="mega" data-count-href="/bkader/ci-theme/stargazers" data-count-api="/repos/bkader/ci-theme#stargazers_count" data-count-aria-label="# stargazers on GitHub" aria-label="Star bkader/ci-theme on GitHub">Star</a>
+					<a class="github-button" href="https://github.com/bkader/ci-theme/subscription" data-icon="octicon-eye" data-style="mega" data-count-href="/bkader/CodeIgniter/watchers" data-count-api="/repos/bkader/CodeIgniter#subscribers_count" data-count-aria-label="# watchers on GitHub" aria-label="Watch bkader/CodeIgniter on GitHub">Watch</a>
+					<a class="github-button" href="https://github.com/bkader/ci-theme" data-icon="octicon-star" data-style="mega" data-count-href="/bkader/CodeIgniter/stargazers" data-count-api="/repos/bkader/CodeIgniter#stargazers_count" data-count-aria-label="# stargazers on GitHub" aria-label="Star bkader/CodeIgniter on GitHub">Star</a>
 					<a class="github-button" href="https://github.com/bkader" data-style="mega" data-count-href="/bkader/followers" data-count-api="/users/bkader#followers" data-count-aria-label="# followers on GitHub" aria-label="Follow @bkader on GitHub">Follow @bkader</a>
 				</span>
 			</div><!--/.column-->

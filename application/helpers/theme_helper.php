@@ -33,7 +33,7 @@ if ( ! function_exists('build_path'))
             return implode(DIRECTORY_SEPARATOR, array_map('rtrim', $args, array(DIRECTORY_SEPARATOR))).DIRECTORY_SEPARATOR;
         }
 
-        return NULL;
+        return null;
     }
 }
 
@@ -47,7 +47,7 @@ if ( ! function_exists('assets_url'))
      * @param   string  $folder     In case of a distinct folder
      * @return  string
      */
-    function assets_url($uri = '', $folder = NULL)
+    function assets_url($uri = '', $folder = null)
     {
         return get_instance()->theme->assets_url($uri, $folder);
     }
@@ -62,7 +62,7 @@ if ( ! function_exists('css_url'))
      * @param   string  $file   filename with or without .css extension
      * @return  string
      */
-    function css_url($file = NULL, $folder = NULL)
+    function css_url($file = null, $folder = null)
     {
         return get_instance()->theme->css_url($file, $folder);
     }
@@ -77,7 +77,7 @@ if ( ! function_exists('css'))
      * @param   mixed   $attr   attributes to append to string
      * @return  string
      */
-    function css($file = NULL, $cdn = NULL, $attrs = '', $folder = NULL)
+    function css($file = null, $cdn = null, $attrs = '', $folder = null)
     {
         return get_instance()->theme->css($file, $cdn, $attrs, $folder);
     }
@@ -92,7 +92,7 @@ if ( ! function_exists('js_url'))
      * @param   string  $file   filename with or without .js extension
      * @return  string
      */
-    function js_url($file, $folder = NULL)
+    function js_url($file, $folder = null)
     {
         return get_instance()->theme->js_url($file, $folder);
     }
@@ -107,7 +107,7 @@ if ( ! function_exists('js'))
      * @param   mixed   $attr   attributes to append to string
      * @return  string
      */
-    function js($file = NULL, $cdn = NULL, $attrs = '', $folder = NULL)
+    function js($file = null, $cdn = null, $attrs = '', $folder = null)
     {
         return get_instance()->theme->js($file, $cdn, $attrs, $folder);
     }
@@ -121,10 +121,10 @@ if ( ! function_exists('meta'))
      * Display a HTML meta tag
      *
      * @param   mixed   $name   string or associative array
-     * @param   string  $content  content or NULL if $name is array
+     * @param   string  $content  content or null if $name is array
      * @return  string
      */
-    function meta($name, $content = NULL, array $attrs = array(), $type = 'name')
+    function meta($name, $content = null, array $attrs = array(), $type = 'name')
     {
         return get_instance()->theme->meta($name, $content, $attrs, $type);
     }
@@ -140,13 +140,13 @@ if ( ! function_exists('img_url'))
      * @param   string  $folder     in case of a distinct folder
      * @return  string
      */
-    function img_url($file = NULL, $folder = NULL)
+    function img_url($file = null, $folder = null)
     {
-        if (filter_var($file, FILTER_VALIDATE_URL) !== FALSE)
+        if (filter_var($file, FILTER_VALIDATE_URL) !== false)
         {
             return $file;
         }
-        $file = ($folder !== NULL) ? $file : 'img/'.$file;
+        $file = ($folder !== null) ? $file : 'img/'.$file;
         return assets_url($file, $folder);
     }
 }
@@ -160,13 +160,13 @@ if ( ! function_exists('img'))
      * @param   string  $folder     in case of a distinct folder
      * @return  string
      */
-    function img($file = NULL, $attrs = '', $folder = NULL)
+    function img($file = null, $attrs = '', $folder = null)
     {
         if (strlen($file) > 0)
         {
             return '<img src="'.img_url($file, $folder).'"'._stringify_attributes($attrs).' />';
         }
-        return NULL;
+        return null;
     }
 }
 
@@ -177,7 +177,7 @@ if ( ! function_exists('img_alt'))
      *
      * @return  string
      */
-    function img_alt($width, $height = NULL, $text = NULL, $background = NULL, $foreground = NULL)
+    function img_alt($width, $height = null, $text = null, $background = null, $foreground = null)
     {
         $params = array();
 
@@ -216,7 +216,7 @@ if ( ! function_exists('theme_view'))
      * @param   string  $master     in case you use a distinct master view
      * @return  void
      */
-    function theme_view($view, $data = array(), $return = FALSE, $master = 'template')
+    function theme_view($view, $data = array(), $return = false, $master = 'template')
     {
         return get_instance()->theme->load($view, $data, $return, $master);
     }
@@ -234,7 +234,7 @@ if ( ! function_exists('load_view'))
      * @param   bool    $return whether to return or output
      * @return  mixed
      */
-    function load_view($view, $data = array(), $return = FALSE)
+    function load_view($view, $data = array(), $return = false)
     {
         return get_instance()->theme->view($view, $data, $return);
     }
@@ -253,7 +253,7 @@ if ( ! function_exists('theme_partial'))
      * @param   bool    $return     whether to return it or not.
      * @return  mixed
      */
-    function theme_partial($view, $data = array(), $return = FALSE)
+    function theme_partial($view, $data = array(), $return = false)
     {
         return get_instance()->theme->partial($view, $data, $return);
     }
@@ -271,7 +271,7 @@ if ( ! function_exists('theme_header'))
      * @param   bool    $return     whether to return it or not.
      * @return  mixed
      */
-    function theme_header($data = array(), $return = FALSE)
+    function theme_header($data = array(), $return = false)
     {
         return theme_partial('header', $data, $return);
     }
@@ -289,7 +289,7 @@ if ( ! function_exists('theme_footer'))
      * @param   bool    $return     whether to return it or not.
      * @return  mixed
      */
-    function theme_footer($data = array(), $return = FALSE)
+    function theme_footer($data = array(), $return = false)
     {
         return theme_partial('footer', $data, $return);
     }
@@ -311,11 +311,11 @@ if ( ! function_exists('print_alert'))
     {
         if (empty($message))
         {
-            return NULL;
+            return null;
         }
 
         // Make sure the Theme library is loaded.
-        if ( ! class_exists('Theme', FALSE))
+        if ( ! class_exists('Theme', false))
         {
             get_instance()->load->library('theme');
         }
@@ -323,7 +323,7 @@ if ( ! function_exists('print_alert'))
         return theme_partial($view, array(
             'type' => $type, 
             'message' => $message
-        ), TRUE);
+        ), true);
     }
 }
 
@@ -350,7 +350,7 @@ if ( ! function_exists('set_alert'))
         // If not message is set, nothing to do.
         if (empty($message))
         {
-            return FALSE;
+            return false;
         }
 
         if (is_array($message))
@@ -366,7 +366,7 @@ if ( ! function_exists('set_alert'))
         }
 
         // Make sure the session library is loaded
-        if ( ! class_exists('CI_Session', FALSE))
+        if ( ! class_exists('CI_Session', false))
         {
             get_instance()->load->library('session');
         }
@@ -400,7 +400,7 @@ if ( ! function_exists('print_flash_alert'))
             return $output;
         }
 
-        return NULL;
+        return null;
     }
 }
 

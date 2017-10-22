@@ -2,27 +2,14 @@
 !.gitignore
 !LICENSE
 !README.md
-application/.htaccess
-application/index.html
-application/cache
-application/config/*
+application/*
 !application/config/theme.php
-application/controllers/*
 !application/controllers/Welcome.php
-application/core
-application/helpers/*
 !application/helpers/theme_helper.php
-application/hooks
-application/language
-application/libraries/*
 !application/libraries/Theme.php
-application/logs
-application/models
-application/third_party
-application/views
 
 # remove system files & folder
-system
+system/*
 
 # Keepin content folder
 !content/*
