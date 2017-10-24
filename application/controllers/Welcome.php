@@ -20,23 +20,6 @@ class Welcome extends CI_Controller {
 	 */
 	public function index()
 	{
-		$this->theme
-			->title('Welcome')
-			->add_css('style')
-			->load('welcome');
-	}
-
-	/**
-	 * Example to use Semantic UI
-	 *
-	 * @return 	void
-	 */
-	public function semantic()
-	{
-		$this->theme
-				->theme('semantic')
-				->add_css('style')
-				->add_js('scripts')
-				->load('welcome');
+		$this->load->view('welcome_message');
 	}
 }

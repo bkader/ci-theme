@@ -2,7 +2,7 @@
 	<div class="panel panel-default">
 		<div class="panel-body">
 			<p>This view is located in:</p>
-			<pre><code>www/content/themes/default/partials/sidebar.php</code></pre>
+			<pre><code>www/content/themes/default/views/_partials/sidebar.php</code></pre>
 			<div class="row">
 				<div class="col-xs-12 col-sm-6">
 					<?php echo img('bkader.jpg', 'class="img-responsive img-thumbnail"', 'uploads'); ?>

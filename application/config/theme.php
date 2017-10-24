@@ -26,7 +26,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |  'theme.cache_lifetime' 	whether to cache output or not.
 |
 | CDN settings:
-|	'theme.cdn_enabled'		If TRUE, the 2nd param of css(), js() is used.
+|	'theme.cdn_enabled'		If true, the 2nd param of css(), js() is used.
 |	'theme.cdn_server'		If your host your assets on a CDN, privide URL.
 */
 
@@ -34,7 +34,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $config['theme.theme'] = 'default';
 
 // Site default master view file.
-$config['theme.master'] = 'template';
+$config['theme.master'] = 'default';
 
 // Site default layout file
 $config['theme.layout'] = 'default';
@@ -58,10 +58,10 @@ $config['theme.cdn_server'] = ''; // i.e: 'http://static.myhost.com/';
 // Backup plan :D for site name, desription & keywords
 // ------------------------------------------------------------------------
 
-// Default site title, description and keywords.
-$config['theme.site_title']       = 'CI-Theme';
-$config['theme.site_description'] = 'CodeIgniter Themes Library';
-$config['theme.site_keywords']    = 'codeigniter, themes, libraries, bkader';
+// Default site name, description and keywords.
+$config['theme.site_name']        = 'CI-Theme';
+$config['theme.site_description'] = 'Simply makes your CI-based applications themable. Easy and fun to use.';
+$config['theme.site_keywords']    = 'codeigniter, themes, libraries, bkader, bouyakoub';
 
 /* End of file theme.php */
 /* Location: ./application/config/theme.php */

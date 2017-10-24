@@ -27,8 +27,8 @@ class Theme
 		'cache_lifetime'   => 0,
 		'cdn_enabled'      => false,
 		'cdn_server'       => null,
-		'site_title'       => 'CodeIgniter',
-		'site_description' => 'CodeIgniter Themes Library',
+		'site_name'       => 'CI-Theme',
+		'site_description' => 'Simply makes your CI-based applications themable. Easy and fun to use.',
 		'site_keywords'    => 'codeigniter, themes, libraries, bkader'
 	);
 
@@ -63,7 +63,7 @@ class Theme
 	protected $metadata  = array();
 
 	protected $theme  = 'default';
-	protected $master = 'template';
+	protected $master = 'default';
 	protected $layout = 'default';
 
 	/**
@@ -95,8 +95,13 @@ class Theme
 		$this->method     = $this->CI->router->fetch_method();
 
 		// Set some useful variables
-		$this->set('site_title', $this->site_title, true);
-		$this->set('uri_string', $this->CI->uri->uri_string(), true);
+		$this->set(array(
+			'site_name'  => $this->site_name,
+			'uri_string' => $this->CI->uri->uri_string(),
+			'module'     => $this->module,
+			'controller' => $this->controller,
+			'method'     => $this->method,
+		), null, true);
 	}
 
 	// ------------------------------------------------------------------------
@@ -116,8 +121,8 @@ class Theme
 			$config['theme.theme'] = $this->CI->config->item('theme');
 		}
 
-		// Are site_title, site_description and site_keywords overriden?
-		foreach (array('site_title', 'site_description', 'site_keywords') as $meta)
+		// Are site_name, site_description and site_keywords overriden?
+		foreach (array('site_name', 'site_description', 'site_keywords') as $meta)
 		{
 			if ($_meta = $this->CI->config->item($meta))
 			{
@@ -214,9 +219,14 @@ class Theme
 	 * @param 	string 	$name
 	 * @return 	mixed
 	 */
-	public function get($name)
+	public function get($name, $index = null)
 	{
-		return isset($this->config[$name]) ? $this->config[$name] : null;
+		if ($index === null)
+		{
+			return isset($this->config[$name]) ? $this->config[$name] : null;
+		}
+
+		return isset($this->config[$index][$name]) ? $this->config[$index][$name] : null;
 	}
 
 	// ------------------------------------------------------------------------
@@ -241,7 +251,7 @@ class Theme
 	 * @param 	string 	$master
 	 * @return 	object
 	 */
-	public function master($master = 'template')
+	public function master($master = 'default')
 	{
 		$this->master = $master;
 		return $this;
@@ -271,7 +281,7 @@ class Theme
 			return $this;
 		}
 
-		$this->title = $this->site_title;
+		$this->title = $this->site_name;
 		if ( ! empty($args = func_get_args()))
 		{
 			is_array($args[0]) && $args = $args[0];
@@ -889,14 +899,40 @@ class Theme
 	 * @param 	string 	$master 	in case you use a distinct master view
 	 * @return  void
 	 */
-	public function load($view, $data = array(), $return = false, $master = 'template')
+	public function load($view, $data = array(), $return = false, $master = 'default')
 	{
 		// Start beckmark
 		$this->CI->benchmark->mark('theme_start');
 
-		if (file_exists(FCPATH."content/themes/{$this->config['theme']}/functions.php"))
+		$theme_path = FCPATH."content/themes/{$this->config['theme']}";
+		// Is the manifest present?
+		if ( ! file_exists("{$theme_path}/manifest.json"))
 		{
-			include FCPATH."content/themes/{$this->config['theme']}/functions.php";
+			show_error(
+				'The theme you are currently using is missing the "manifest.json" file.',
+				500,
+				'Missing Manifest File'
+			);
+		}
+
+		$manifest = file_get_contents("{$theme_path}/manifest.json");
+		$manifest = json_decode($manifest, true);
+		if ( ! is_array($manifest))
+		{
+			show_error(
+				'The "manifest.json" provided with your theme is not valid..',
+				500,
+				'Error Manifest.json'
+			);
+		}
+
+		$this->config['manifest'] = $manifest;
+		unset($manifest);
+
+		// Does the theme have functions.php file?
+		if (file_exists("{$theme_path}functions.php"))
+		{
+			include_once("{$theme_path}functions.php");
 		}
 
 		// Build the whole outout
@@ -907,6 +943,16 @@ class Theme
 
 		// Stop benchmark
 		$this->CI->benchmark->mark('theme_end');
+
+		// Pass elapsed time to views.
+		if ($this->CI->output->parse_exec_vars === true)
+		{
+			$output = str_replace(
+				'{theme_time}',
+				$this->CI->benchmark->elapsed_time('theme_start', 'theme_end'),
+				$output
+			);
+		}
 
 		if ($return)
 		{
@@ -955,6 +1001,12 @@ class Theme
 			elseif (method_exists($this, $key))
 			{
 				$this->{$key}($val);
+			}
+
+			// Otherwise we set variables to views.
+			else
+			{
+				$this->set($key, $val, true);
 			}
 		}
 
@@ -1032,7 +1084,7 @@ class Theme
 		$this->set('layout', $this->_load_file('layout', $this->layout, $layout, true));
 
 		// Prepare the output
-		$output = $this->_load_file('template', $this->master, $this->data, true);
+		$output = $this->_load_file('default', $this->master, $this->data, true);
 
 		// Minify HTML output if set to TRE
 		if ($this->compress === true)
@@ -1066,7 +1118,7 @@ class Theme
 
 				// prepare all path
 				$paths = array(
-					build_path(FCPATH, 'content', 'themes', $this->config['theme'], 'modules', $this->module),
+					build_path(FCPATH, 'content', 'themes', $this->config['theme'], 'views', '_modules', $this->module),
 					build_path(FCPATH, 'content', 'themes', $this->config['theme'], 'views'),
 					build_path(APPPATH, 'modules', $this->module, 'views'),
 					build_path(APPPATH, 'views'),
@@ -1116,11 +1168,11 @@ class Theme
 			case 'partials':
 				// prepare all path
 				$paths = array(
-					build_path(FCPATH, 'content', 'themes', $this->config['theme'], 'modules', $this->module, 'partials'),
-					build_path(FCPATH, 'content', 'themes', $this->config['theme'], 'partials'),
-					build_path(APPPATH, 'modules', $this->module, 'views', 'partials'),
-					build_path(APPPATH, 'views', 'partials'),
-					build_path(VIEWPATH, 'partials'),
+					build_path(FCPATH, 'content', 'themes', $this->config['theme'], 'views', '_modules', $this->module, '_partials'),
+					build_path(FCPATH, 'content', 'themes', $this->config['theme'], 'views', '_partials'),
+					build_path(APPPATH, 'modules', $this->module, 'views', '_partials'),
+					build_path(APPPATH, 'views', '_partials'),
+					build_path(VIEWPATH, '_partials'),
 				);
 
 				// remove uneccessary paths if $this->module is null
@@ -1167,11 +1219,11 @@ class Theme
 
 				// prepare all path
 				$paths = array(
-					build_path(FCPATH, 'content', 'themes', $this->config['theme'], 'modules', $this->module, 'layouts'),
-					build_path(FCPATH, 'content', 'themes', $this->config['theme'], 'layouts'),
-					build_path(APPPATH, 'modules', $this->module, 'views', 'layouts'),
-					build_path(APPPATH, 'views', 'layouts'),
-					build_path(VIEWPATH, 'layouts'),
+					build_path(FCPATH, 'content', 'themes', $this->config['theme'], 'views', '_modules', $this->module, '_layouts'),
+					build_path(FCPATH, 'content', 'themes', $this->config['theme'], 'views', '_layouts'),
+					build_path(APPPATH, 'modules', $this->module, 'views', '_layouts'),
+					build_path(APPPATH, 'views', '_layouts'),
+					build_path(VIEWPATH, '_layouts'),
 				);
 
 				// remove uneccessary paths if $this->module is null
@@ -1221,11 +1273,11 @@ class Theme
 
 				// prepare all path
 				$paths = array(
-					build_path(FCPATH, 'content', 'themes', $this->config['theme'], 'modules', $this->module),
-					build_path(FCPATH, 'content', 'themes', $this->config['theme']),
-					build_path(APPPATH, 'modules', $this->module, 'views'),
-					build_path(APPPATH, 'views'),
-					build_path(VIEWPATH),
+					build_path(FCPATH, 'content', 'themes', $this->config['theme'], 'views', '_modules', $this->module, '_master'),
+					build_path(FCPATH, 'content', 'themes', $this->config['theme'], 'views', '_master'),
+					build_path(APPPATH, 'modules', $this->module, 'views', '_master'),
+					build_path(APPPATH, 'views', '_master'),
+					build_path(VIEWPATH, '_master'),
 				);
 
 				// remove uneccessary paths if $this->module is null

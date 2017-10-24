@@ -1,7 +1,7 @@
 <div class="sixteen wide tablet six wide computer column">
 	<div class="ui segment">
 		<p>This view is located in:</p>
-		<pre><code>www/content/themes/default/partials/sidebar.php</code></pre>
+		<pre><code>www/content/themes/semantic/views/_partials/sidebar.php</code></pre>
 		<div class="ui grid">
 			<div class="sixteen wide tablet eight wide computer column">
 				<?php echo img('bkader.jpg', 'class="ui bordered fluid image"', 'uploads'); ?>

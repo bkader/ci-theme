@@ -4,7 +4,8 @@
 !README.md
 application/*
 !application/config/theme.php
-!application/controllers/Welcome.php
+!application/controllers/Example.php
+!application/controllers/Admin.php
 !application/helpers/theme_helper.php
 !application/libraries/Theme.php
 

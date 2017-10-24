@@ -8,13 +8,13 @@
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span>
 			</button>
-			<a class="navbar-brand" href="<?php echo site_url(); ?>"><?php echo @$site_title; ?></a>
+			<a class="navbar-brand" href="<?php echo site_url(); ?>"><?php echo @$site_name; ?></a>
 		</div><!--/.navbar-header-->
 
 		<!-- Collect the nav links, forms, and other content for toggling -->
 		<div class="collapse navbar-collapse navbar-ex1-collapse">
 			<ul class="nav navbar-nav">
-				<li><a href="<?php echo site_url('welcome/semantic'); ?>">Semantic Theme</a></li>
+				<li><a href="<?php echo site_url('example/semantic'); ?>">Semantic Theme</a></li>
 				<li><a href="https://goo.gl/gIMfYw" target="_blank">GitHub</a></li>
 				<li><a href="http://www.codeigniter.com/" target="_blank">CodeIgniter</a></li>
 				<li><a href="https://goo.gl/wGXHO9" target="_blank">@kader</a></li>

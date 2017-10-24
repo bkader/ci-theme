@@ -1,7 +1,7 @@
 <nav class="ui fixed inverted menu">
 	<div class="ui container">
-		<a class="header item" href="<?php echo site_url(); ?>"><?php echo @$site_title; ?></a>
-		<a class="item" href="<?php echo site_url(); ?>">Bootstrap Theme</a></li>
+		<a class="header item" href="<?php echo site_url(); ?>"><?php echo @$site_name; ?></a>
+		<a class="item" href="<?php echo site_url('example'); ?>">Bootstrap Theme</a></li>
 		<a class="item" href="https://goo.gl/gIMfYw" target="_blank">GitHub</a>
 		<a class="item" href="http://www.codeigniter.com/" target="_blank">CodeIgniter</a>
 		<a class="item" href="https://goo.gl/wGXHO9" target="_blank">@kader</a>
