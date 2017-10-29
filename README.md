@@ -1,5 +1,6 @@
 # CI-Theme - CodeIgniter Themes
 I tried a lot of templates and themes libraries and I was satisfy with them but I decided to make my own, as simple as it can get. So here is my library, free to use, like **CodeIgniter**.
+**NOTE**: Sublime text auto completions has been added to the repo.
 ## What's CI-Theme?
 CI-Theme is a library that helps you make your CodeIgniter application theme-able :D. Just download it, drop files into their respective folders (__content__ folder is public). Voilà.
 

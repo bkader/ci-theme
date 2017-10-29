@@ -1,0 +1,32 @@
+{
+	"scope": "source.php",
+	"completions":
+	[
+		{"trigger": "theme_set", "contents": "\\$this->theme->set('${1:var}', '${2:value}'${3:, false});"},
+		{"trigger": "theme_get", "contents": "\\$this->theme->get('${1:name}'${2:, 'index'});"},
+		{"trigger": "theme_theme", "contents": "\\$this->theme->theme('${1:default}');"},
+		{"trigger": "theme_master", "contents": "\\$this->theme->master('${1:default}');"},
+		{"trigger": "theme_layout", "contents": "\\$this->theme->layout('${1:default}');"},
+		{"trigger": "theme_title", "contents": "\\$this->theme->title('${1:Page Title}');"},
+		{"trigger": "theme_description", "contents": "\\$this->theme->description('${1:This is a dummy page description}');"},
+		{"trigger": "theme_keywords", "contents": "\\$this->theme->keywords('${1:these, are, dummy, keywords}');"},
+		{"trigger": "theme_add_meta", "contents": "\\$this->theme->add_meta('${1:name}', '${2:content}');"},
+		{"trigger": "theme_meta", "contents": "\\$this->theme->meta('${1:name}', '${2:content}'${3:, 'attributes'}${4:, 'type'});"},
+		{"trigger": "theme_css", "contents": "\\$this->theme->css('${1:files}'${2:, 'CDN_URL'}${3:, 'attributes'}${4:, 'folder'});"},
+		{"trigger": "theme_add_css", "contents": "\\$this->theme->add_css('${1:files}');"},
+		{"trigger": "theme_remove_css", "contents": "\\$this->theme->remove_css('${1:files}');"},
+		{"trigger": "theme_replace_css", "contents": "\\$this->theme->replace_css('${1:files}');"},
+		{"trigger": "theme_js", "contents": "\\$this->theme->js('${1:files}'${2:, 'CDN_URL'}${3:, 'attributes'}${4:, 'folder'});"},
+		{"trigger": "theme_add_js", "contents": "\\$this->theme->add_js('${1:files}');"},
+		{"trigger": "theme_remove_js", "contents": "\\$this->theme->remove_js('${1:files}');"},
+		{"trigger": "theme_replace_js", "contents": "\\$this->theme->replace_js('${1:files}');"},
+		{"trigger": "theme_partial", "contents": "\\$this->theme->partial('${1:view}'${2:, \\$data}${3:, false});"},
+		{"trigger": "theme_add_partial", "contents": "\\$this->theme->add_partial('${1:view}'${2:, \\$data}${3:, 'name'});"},
+		{"trigger": "theme_remove_partial", "contents": "\\$this->theme->remove_partial('${1:partials}');"},
+		{"trigger": "theme_replace_partial", "contents": "\\$this->theme->replace_partial('${1:old}', '${2:new}'${3:, \\$data});"},
+		{"trigger": "theme_view", "contents": "\\$this->theme->view('${1:name}'${2:, \\$data}${3:, false});"},
+		{"trigger": "theme_load", "contents": "\\$this->theme->load('${1:name}'${2:, \\$data}${3:, false}${4:, 'default'});"},
+		{"trigger": "theme_render", "contents": "\\$this->theme->render(\n\t'${1:view}'${2:, \n\t\\$data}${3:, \n\t'Page Title'}${4:, \n\tarray()}${5:, \n\tfalse}\n);"},
+		{"trigger": "theme_build", "contents": "\\$this->theme->build(\n\t'${1:view}'${2:, \n\t\\$data}${3:, \n\t'Page Title'}${4:, \n\tarray()}\n);"}
+	]
+}

@@ -217,6 +217,7 @@ class Theme
 	 * Returns a data store in class Config property
 	 * @access 	public
 	 * @param 	string 	$name
+	 * @param 	string 	$index
 	 * @return 	mixed
 	 */
 	public function get($name, $index = null)
