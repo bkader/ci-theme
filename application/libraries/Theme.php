@@ -1150,6 +1150,7 @@ class Theme
 							$found = true;
 							$this->CI->load->vars($data);
 							$output = $this->CI->load->file($path.$view.'.php', $return);
+							$this->CI->load->clear_vars();
 							break;
 						}
 					}
@@ -1200,6 +1201,7 @@ class Theme
 							$found = true;
 							$this->CI->load->vars($data);
 							$output = $this->CI->load->file($path.$view.'.php', $return);
+							$this->CI->load->clear_vars();
 							break;
 						}
 					}
@@ -1251,6 +1253,7 @@ class Theme
 							$found = true;
 							$this->CI->load->vars($data);
 							$output = $this->CI->load->file($path.$view.'.php', $return);
+							$this->CI->load->clear_vars();
 							break;
 						}
 					}
@@ -1305,6 +1308,7 @@ class Theme
 							$found = true;
 							$this->CI->load->vars($data);
 							$output = $this->CI->load->file($path.$view.'.php', $return);
+							$this->CI->load->clear_vars();
 							break;
 						}
 					}
