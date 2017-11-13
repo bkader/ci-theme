@@ -1,1 +1,7 @@
-{"name": "Bootstrap","author": "Kader Bouyakoub","website": "https://www.ianhub.com/","screenshot": "screenshot.jpg"}
+{
+	"name": "Bootstrap",
+	"description": "Default CI-Theme theme using Bootstrap v3.3.7",
+	"author": "Kader Bouyakoub",
+	"website": "https://www.ianhub.com/",
+	"screenshot": "screenshot.jpg"
+}

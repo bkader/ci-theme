@@ -1,5 +1,5 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?><div class="col-xs-12 col-sm-8">
-	<?php echo print_alert('This is a dummy alert just to show you how to display an alert using <strong>print_alert()</strong> function.'); ?>
+<div class="col-xs-12 col-sm-8">
+	<?php echo bs_alert('This is a dummy alert just to show you how to display an alert using <strong>print_alert()</strong> function.'); ?>
 
 	<div class="panel panel-default">
 		<div class="panel-body">

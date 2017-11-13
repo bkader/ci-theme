@@ -19,13 +19,21 @@ class Example extends CI_Controller
 
 	public function index()
 	{
+		// These are used to add partial views.
 		$this->theme
-				->title('Example')
-				->add_css('style')
-				->add_partial('header')
-				->add_partial('sidebar')
-				->add_partial('footer')
-				->load('example');
+			->add_partial('header')
+			->add_partial('sidebar')
+			->add_partial('footer');
+		
+		// You can use this syntax here,
+		// $this->theme->title('Example');
+		// $this->theme->load('example');
+
+		/**
+		 * Or for the shorthand version.
+		 * @see Theme.php:1057
+		 */
+		render('example', null, 'Example');
 	}
 
 	/**
@@ -36,12 +44,26 @@ class Example extends CI_Controller
 	public function semantic()
 	{
 		$this->theme
-				->theme('semantic')
-				->add_css('style')
-				->add_partial('header')
-				->add_partial('sidebar')
-				->add_partial('footer')
-				->add_js('scripts')
-				->load('example');
+			->theme('semantic')
+			->add_partial('header')
+			->add_partial('sidebar')
+			->add_partial('footer');
+
+		// As the method above, you can use
+		// either the long or the short version.
+		// $this->theme
+		// 	->title('Semantic Theme')
+		// 	->add_css('style')
+		// 	->add_js('scripts')
+		// 	->load('example');
+
+		/**
+		 * Or for the shorthand version.
+		 * @see Theme.php:1057
+		 */
+		render('example', null, 'Semantic Theme', array(
+			'css' => 'style',	// as string
+			'js' => array('scritps') // as array for multiple files.
+		));
 	}
 }

@@ -1,4 +1,4 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed'); echo @$header; ?>
+<?php echo @$header; ?>
 <div class="container">
 	<?php echo print_flash_alert(); ?>
 	<div class="row">

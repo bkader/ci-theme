@@ -1,9 +1,10 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?><!DOCTYPE html>
-<html class="<?php echo @$html_class ?: 'no-js'; ?>" lang="<?php echo substr(config_item('language'), 0, 2); ?>">
+<!DOCTYPE html>
+<html class="<?php echo @$html_class ?: 'no-js'; ?>" lang="<?php echo @$lang_abbr ?: 'en'; ?>">
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="x-ua-compatible" content="ie=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<base href="<?php echo base_url(); ?>">
 	<title><?php echo @$title; ?></title>
 	<link rel="icon" href="<?php echo base_url('favicon.ico'); ?>">
 	<?php echo @$metadata; ?>
@@ -22,7 +23,7 @@
 	<![endif]-->
 
 </head>
-<body>
+<body class="<?php echo @$body_class; ?>">
     <!--[if lte IE 9]>
         <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
     <![endif]-->

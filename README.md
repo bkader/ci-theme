@@ -8,30 +8,35 @@ CI-Theme is a library that helps you make your CodeIgniter application theme-abl
 As I said above, simply drop all given files, configure and voilà, tout est prêt :), everything is set.
 
 ## What to do after?
-You are given a folder names **content** inside which you haves **theme** and **uploads**. All your themes files go under _content/themes__ (simply follow the example of the **default** theme)
+You are given a folder names **content** inside which you have **theme** and **uploads**. All your themes files go under _content/themes_ (simply follow the example of the **default** theme)
 
 This library works as well when in **HMVC**. It will look for views in the following order:
 #### Views:
-1. themes/**theme_name**/modules/**module_name**/
-2. themes/**theme_name**/modules/**module_name**/views/
+2. themes/**theme_name**/views/_modules/**module_name**/
 3. themes/**theme_name**/views/
 4. **module_location**/**module_name**/views/
 5. **views_path** (which is by default **APPPATH/views/**)
 
-#### Partial Views:
-1. themes/**theme_name**/modules/**module_name**/views/partials/
-3. themes/**theme_name**/views/partials/
-4. **module_location**/**module_name**/views/partials/
-5. **views_path**/partials/
+#### Partials:
+1. themes/**theme_name**/views/_modules/**module_name**/_partials/
+3. themes/**theme_name**/views/_partials/
+4. **module_location**/**module_name**/views/_partials/
+5. **views_path**/_partials/
+
+#### Layouts:
+1. themes/**theme_name**/views/_modules/**module_name**/_layouts/
+3. themes/**theme_name**/views/_layouts/
+4. **module_location**/**module_name**/views/_layouts/
+5. **views_path**/_layouts/
 
 #### Master View:
-The master view is named **template.php** by default but it can be overridden (4th parameter of Theme::load()).
+The master view is named **default.php** by default but it can be overridden (4th parameter of Theme::load()).
 The library will search inside these folders in the following order:
-1. themes/**theme_name**/modules/**module_name**/views/
-2. themes/**theme_name**/
-3. **module_location**/**module_name**/views/
-4. **views_path**/
+1. themes/**theme_name**/views/_modules/**module_name**/_master/
+3. themes/**theme_name**/views/_master/
+4. **module_location**/**module_name**/views/_master/
+5. **views_path**/_master/
 
-This was made when using **CodeIgniter version 3.1.3**. Feel free to report anything and suggest any enhancements.
+This was made when using **CodeIgniter version 3.1.6**. Feel free to report anything and suggest any enhancements.
 
 All credits go to owners of any external files used here.

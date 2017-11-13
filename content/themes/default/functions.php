@@ -31,12 +31,12 @@ if ( ! function_exists('bs_alert'))
 		// Turn 'error' into 'danger' because it does not exist on bootstrap.
 		$type == 'error' && $type = 'danger';
 
-		$alert =<<<EOD
+		$alert =<<<END
 <div class="alert alert-{type}">
 	<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
 	{message}
 </div>
-EOD;
+END;
 		return str_replace(
 			array('{type}', '{message}'),
 			array($type, $message),

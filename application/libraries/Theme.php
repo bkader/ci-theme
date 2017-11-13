@@ -21,6 +21,7 @@ class Theme
 	 */
 	protected $config = array(
 		'theme'            => 'default',
+		'master'           => 'default',
 		'layout'           => 'default',
 		'title_sep'        => '-',
 		'compress'         => false,
@@ -33,38 +34,17 @@ class Theme
 	);
 
 	/**
-	 * Current module's details
-	 * @var 	string 	$module 		module's name if any
-	 * @var 	string 	$controller 	controller's name
-	 * @var 	string 	$method 		method's name
-	 */
-	protected $module     = null;
-	protected $controller = null;
-	protected $method     = null;
-
-	/**
-	 * Additional partial views
-	 * @var 	array
-	 */
-	protected $partials = array();
-
-	/**
-	 * Page title, description, & keywords
-	 */
-	protected $title;
-	protected $description;
-	protected $keywords;
-
-	/**
 	 * Page's additional CSS, JS & meta tags
 	 */
 	protected $css_files = array();
 	protected $js_files  = array();
 	protected $metadata  = array();
 
-	protected $theme  = 'default';
-	protected $master = 'default';
-	protected $layout = 'default';
+	/**
+	 * Array of partial views to use.
+	 * @var 	array
+	 */
+	protected $partials = array();
 
 	/**
 	 * Array of variables to pass to view
@@ -83,25 +63,28 @@ class Theme
 		$this->initialize($config);
 
 		// Make sure URL helper is load then we load our helper
-		function_exists('base_url') or $this->CI->load->helper('url');
-		$this->CI->load->helper('theme');
+		(function_exists('base_url')) or $this->CI->load->helper('url');
 
-		// Prepare current module's details.
+		// Add site details to views.
+		$this->set('lang_abbr', substr($this->CI->config->item('language'), 0, 2));
+		$this->set('site_name', $this->site_name, true);
+		$this->set('uri_string', uri_string(), true);
+
+		// Prepare current module's details and pass them to view.
+		// The reason we are doing this is so we can eventually set
+		// our active uris using module, controller and/or method.
+
 		if (method_exists($this->CI->router, 'fetch_module')) 
 		{
 			$this->module = $this->CI->router->fetch_module();
+			$this->set('module', $this->module, true);
 		}
 		$this->controller = $this->CI->router->fetch_class();
 		$this->method     = $this->CI->router->fetch_method();
+		$this->set('controller', $this->controller, true);
+		$this->set('method', $this->method, true);
 
-		// Set some useful variables
-		$this->set(array(
-			'site_name'  => $this->site_name,
-			'uri_string' => $this->CI->uri->uri_string(),
-			'module'     => $this->module,
-			'controller' => $this->controller,
-			'method'     => $this->method,
-		), null, true);
+		log_message('debug', 'Theme Class Initialized');
 	}
 
 	// ------------------------------------------------------------------------
@@ -114,36 +97,68 @@ class Theme
 	 */
 	public function initialize(array $config = array())
 	{
-		// You can override the config set in theme.php by adding to
-		// your custom config file: $config['theme'] = 'your_theme';
-		if ($this->CI->config->item('theme'))
-		{
-			$config['theme.theme'] = $this->CI->config->item('theme');
-		}
+		// Get rid of the full array.
+		(is_array($config['theme'])) && $config = $config['theme'];
 
-		// Are site_name, site_description and site_keywords overriden?
-		foreach (array('site_name', 'site_description', 'site_keywords') as $meta)
+		// You can override the config set in theme.php by adding to
+		// your custom config file.
+		// 
+		// UPDATE:
+		// Instead of going through each of themes config, we simply
+		// loop through the config and make everything overridable.
+
+		foreach ($this->config as $key => $val)
 		{
-			if ($_meta = $this->CI->config->item($meta))
+			if ($item = $this->CI->config->item($key))
 			{
-				$config['theme.'.$meta] = $_meta;
+				$config[$key] = $item;
 			}
 		}
+		unset($key, $val, $item);
 
-		// Is the title separator overriden somewhere? Use it.
-		if ($this->CI->config->item('title_sep'))
+		// Now we replace our default config.
+		$this->config = array_merge($this->config, $config);
+
+		$this->theme_path = FCPATH."content/themes/{$this->theme}/";
+		
+		// Is the manifest present?
+		// Update: this is no longer important. If you have it
+		// you have, if not, who cares? :D
+		if (file_exists($this->theme_path.'/manifest.json'))
 		{
-			$config['theme.title_sep'] = $this->CI->config->item('title_sep');
+			$manifest = file_get_contents($this->theme_path.'/manifest.json');
+			$manifest = json_decode($manifest, true);
+			if ( ! is_array($manifest))
+			{
+				show_error(
+					'The "manifest.json" provided with your theme is not valid..',
+					500,
+					'Error Manifest.json'
+				);
+			}
+
+			$this->config['manifest'] = $manifest;
 		}
 
-		// Always add spaces before and after title separator.
-		$config['theme.title_sep'] = ' '.trim($config['theme.title_sep']).' ';
-
-		// Now we set our class config.
-		foreach ($config as $key => $val)
+		// Does the theme have functions.php file?
+		if (file_exists($this->theme_path.'functions.php'))
 		{
-			$key = str_replace('theme.', '', $key);
-			$this->config[$key] = $val;
+			include_once($this->theme_path.'functions.php');
+		}
+
+		// Create class properties.
+		foreach ($this->config as $key => $val)
+		{
+			// Just to add spaces before 
+			// and after title separator.
+			if ($key == 'title_sep')
+			{
+				$this->title_sep = ' '.trim($val).' ';
+			}
+			else
+			{
+				$this->{$key} = $val;
+			}
 		}
 	}
 
@@ -224,7 +239,21 @@ class Theme
 	{
 		if ($index === null)
 		{
-			return isset($this->config[$name]) ? $this->config[$name] : null;
+			if (isset($this->config[$name]))
+			{
+				return $this->config[$name];
+			}
+
+			// UPDATE
+			// You now have the possiblity to even get element from
+			// theme manifest, like author, description, website...
+
+			if (isset($this->config['manifest']) && isset($this->config['manifest'][$name]))
+			{
+				return $this->config['manifest'][$name];
+			}
+
+			return null;
 		}
 
 		return isset($this->config[$index][$name]) ? $this->config[$index][$name] : null;
@@ -242,7 +271,7 @@ class Theme
 	 */
 	public function theme($theme = 'default')
 	{
-		$this->config['theme'] = $theme;
+		$this->theme = $theme;
 		return $this;
 	}
 
@@ -278,7 +307,8 @@ class Theme
 	 */
 	public function title()
 	{
-		if ( ! empty($this->title)) {
+		if ( ! empty($this->title))
+		{
 			return $this;
 		}
 
@@ -337,22 +367,27 @@ class Theme
 	 * @param 	mixed 	$content
 	 * @return 	object
 	 */
-    public function add_meta($name, $content = null)
+    public function add_meta($name, $content = null, $type = 'meta', $attrs = array())
     {
     	// In case of multiple elements
     	if (is_array($name))
     	{
     		foreach ($name as $key => $val) 
     		{
-    			$this->add_meta($key, $val);
+    			$this->add_meta($key, $val, $type, $attrs);
     		}
 
     		return $this;
     	}
 
-    	$this->metadata[$name] = $content;
+    	$this->metadata[$type.'::'.$name] = array(
+			'content' => $content,
+			'attrs'   => $attrs,
+    	);
     	return $this;
     }
+
+    // public function append_meta($name, $content = null)
 
     /**
      * Display a HTML meta tag
@@ -364,7 +399,7 @@ class Theme
      * 
      * @return  string
      */
-    public function meta($name, $content = null, array $attrs = array(), $type = 'name')
+    public function meta($name, $content = null, $type = 'meta', $attrs = array())
     {
         // Loop through multiple meta tags
         if (is_array($name)) 
@@ -373,28 +408,63 @@ class Theme
 
             foreach ($name as $key => $val) 
             {
-                $meta[] = $this->meta($key, $val, $attrs, $type);
+                $meta[] = $this->meta($key, $val, $type, $attrs);
             }
 
             return implode("\t", $meta);
         }
 
-        // In case of using Open Graph tags, we user 'property' instead of 'name'.
-		if (strpos($name, 'og:') !== false)
-		{
-			$type = 'property';
-		}
+        $attributes = array();
 
-		// Add the type=name attributes.
-		$attrs[$type] = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
+        switch ($type)
+        {
+        	case 'rel':
+        		$tag = 'link';
+        		$attributes['rel'] = $name;
+        		$attributes['href'] = $content;
+        		break;
+        	// In case of a meta tag.
+        	case 'meta':
+        	default:
+		        if ($name == 'charset')
+		        {
+		        	return "<meta charset=\"{$content}\">\n\t";
+		        }
 
-		// Add the content only if not empty.
-		if ($content !== null)
-		{
-			$attrs['content'] = htmlspecialchars($content, ENT_QUOTES, 'UTF-8');
-		}
+		        if ($name == 'base')
+		        {
+		        	return "<base href=\"{$content}\">\n\t";
+		        }
 
-		return '<meta'._stringify_attributes($attrs).'>'."\n";
+		        // The tag by default is "meta"
+        		$tag = 'meta';
+		        
+		        // In case of using Open Graph tags, 
+		        // we user 'property' instead of 'name'.
+		        $type = (strpos($name, 'og:') !== false)? 'property': 'name';
+
+        		if ($content === null)
+        		{
+        			$attributes[$type] = $name;
+        		}
+        		else
+        		{
+        			$attributes[$type] = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
+        			$attributes['content'] = htmlspecialchars($content, ENT_QUOTES, 'UTF-8');
+        		}
+        		break;
+        }
+
+        if (is_array($attrs))
+        {
+        	$attributes = _stringify_attributes(array_merge($attributes, $attrs));
+        }
+        else
+        {
+        	$attributes = _stringify_attributes($attributes).' '.$attrs;
+        }
+
+		return "<{$tag}{$attributes}>\n\t";
     }
 
     // ------------------------------------------------------------------------
@@ -417,7 +487,7 @@ class Theme
 
 		if (empty($folder))
 		{
-			$folder = "themes/{$this->config['theme']}";
+			$folder = "themes/{$this->theme}";
 		}
 
 		/**
@@ -447,7 +517,7 @@ class Theme
 			 * 	<link ... src=".../content/_FOLDER_/css/file.css"
 			 * (without 'assets' being appended)
 			 */
-			if (strpos($folder, $this->config['theme']) !== false)
+			if (strpos($folder, $this->theme) !== false)
 			{
 				$folder .= "/assets";
 			}
@@ -484,6 +554,25 @@ class Theme
 			is_array($css[0]) && $css = $css[0];
 			$css = $this->_remove_extension($css, '.css');
 			$this->css_files = array_merge($this->css_files, $css);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Does like the method above but instead of adding
+	 * css files to the end, it adds them to the start.
+	 * @access 	public
+	 * @param 	mixed 	string|strings or array.
+	 * @return 	object
+	 */
+	public function append_css()
+	{
+		if ( ! empty($css = func_get_args()))
+		{
+			is_array($css[0]) && $css = $css[0];
+			$css = $this->_remove_extension($css, '.css');
+			$this->css_files = array_merge($css, $this->css_files);
 		}
 
 		return $this;
@@ -606,6 +695,25 @@ class Theme
 			is_array($js[0]) && $js = $js[0];
 			$js = $this->_remove_extension($js, '.js');
 			$this->js_files = array_merge($this->js_files, $js);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Does like the method above but instead of adding
+	 * js files to the end, it adds them to the start.
+	 * @access 	public
+	 * @param 	mixed 	string|strings or array.
+	 * @return 	object
+	 */
+	public function append_js()
+	{
+		if ( ! empty($js = func_get_args()))
+		{
+			is_array($js[0]) && $js = $js[0];
+			$js = $this->_remove_extension($js, '.js');
+			$this->js_files = array_merge($js, $this->js_files);
 		}
 
 		return $this;
@@ -870,7 +978,20 @@ class Theme
 	 */
 	protected function _output_meta()
 	{
-		return $this->meta($this->metadata);
+		$output = '';
+
+		if ( ! empty($this->metadata))
+		{
+			foreach($this->metadata as $key => $val)
+			{
+				list($type, $name) = explode('::', $key);
+				$content = isset($val['content'])? $val['content']: null;
+				$attrs = isset($val['attrs'])? $val['attrs']: null;
+				$output .= $this->meta($name, $content, $type, $attrs);
+			}
+		}
+
+		return $output;
 	}
 
 	// ------------------------------------------------------------------------
@@ -905,42 +1026,11 @@ class Theme
 		// Start beckmark
 		$this->CI->benchmark->mark('theme_start');
 
-		$theme_path = FCPATH."content/themes/{$this->config['theme']}";
-		// Is the manifest present?
-		if ( ! file_exists("{$theme_path}/manifest.json"))
-		{
-			show_error(
-				'The theme you are currently using is missing the "manifest.json" file.',
-				500,
-				'Missing Manifest File'
-			);
-		}
-
-		$manifest = file_get_contents("{$theme_path}/manifest.json");
-		$manifest = json_decode($manifest, true);
-		if ( ! is_array($manifest))
-		{
-			show_error(
-				'The "manifest.json" provided with your theme is not valid..',
-				500,
-				'Error Manifest.json'
-			);
-		}
-
-		$this->config['manifest'] = $manifest;
-		unset($manifest);
-
-		// Does the theme have functions.php file?
-		if (file_exists("{$theme_path}functions.php"))
-		{
-			include_once("{$theme_path}functions.php");
-		}
-
 		// Build the whole outout
 		$output = $this->_build_theme_output($view, $data, $master);
 
 		// Let CI do the caching instead of the browser
-		$this->CI->output->cache($this->cache_lifetime);
+		$this->CI->output->cache($this->config['cache_lifetime']);
 
 		// Stop benchmark
 		$this->CI->benchmark->mark('theme_end');
@@ -1001,7 +1091,7 @@ class Theme
 			// We call the method only if it exists.
 			elseif (method_exists($this, $key))
 			{
-				$this->{$key}($val);
+				call_user_func_array(array($this, $key), (array) $val);
 			}
 
 			// Otherwise we set variables to views.
@@ -1052,10 +1142,10 @@ class Theme
 		empty($this->keywords) && $this->keywords();
 
 		// Update new metadata
-		$this->metadata = array_replace_recursive(array(
+		$this->add_meta(array(
 			'description' => $this->description,
-			'keywords'    => $this->keywords,
-		), $this->metadata);
+			'keywords' => $this->keywords,
+		));
 
 		// Put all together.
 		$this->set(array(
@@ -1119,8 +1209,8 @@ class Theme
 
 				// prepare all path
 				$paths = array(
-					build_path(FCPATH, 'content', 'themes', $this->config['theme'], 'views', '_modules', $this->module),
-					build_path(FCPATH, 'content', 'themes', $this->config['theme'], 'views'),
+					build_path(FCPATH, 'content', 'themes', $this->theme, 'views', '_modules', $this->module),
+					build_path(FCPATH, 'content', 'themes', $this->theme, 'views'),
 					build_path(APPPATH, 'modules', $this->module, 'views'),
 					build_path(APPPATH, 'views'),
 					build_path(VIEWPATH),
@@ -1132,8 +1222,8 @@ class Theme
 					unset($paths[0], $paths[2]);
 				}
 
-				// Remove unecessary paths if $this->config['theme'] is not set
-				if ( ! isset($this->config['theme']) or empty($this->config['theme']))
+				// Remove unecessary paths if $this->theme is not set
+				if ( ! isset($this->theme) or empty($this->theme))
 				{
 					unset($paths[0], $paths[1]);
 				}
@@ -1170,8 +1260,8 @@ class Theme
 			case 'partials':
 				// prepare all path
 				$paths = array(
-					build_path(FCPATH, 'content', 'themes', $this->config['theme'], 'views', '_modules', $this->module, '_partials'),
-					build_path(FCPATH, 'content', 'themes', $this->config['theme'], 'views', '_partials'),
+					build_path(FCPATH, 'content', 'themes', $this->theme, 'views', '_modules', $this->module, '_partials'),
+					build_path(FCPATH, 'content', 'themes', $this->theme, 'views', '_partials'),
 					build_path(APPPATH, 'modules', $this->module, 'views', '_partials'),
 					build_path(APPPATH, 'views', '_partials'),
 					build_path(VIEWPATH, '_partials'),
@@ -1183,8 +1273,8 @@ class Theme
 					unset($paths[0], $paths[2]);
 				}
 
-				// Remove unecessary paths if $this->config['theme'] is not set
-				if ( ! isset($this->config['theme']) or empty($this->config['theme']))
+				// Remove unecessary paths if $this->theme is not set
+				if ( ! isset($this->theme) or empty($this->theme))
 				{
 					unset($paths[0], $paths[1]);
 				}
@@ -1222,8 +1312,8 @@ class Theme
 
 				// prepare all path
 				$paths = array(
-					build_path(FCPATH, 'content', 'themes', $this->config['theme'], 'views', '_modules', $this->module, '_layouts'),
-					build_path(FCPATH, 'content', 'themes', $this->config['theme'], 'views', '_layouts'),
+					build_path(FCPATH, 'content', 'themes', $this->theme, 'views', '_modules', $this->module, '_layouts'),
+					build_path(FCPATH, 'content', 'themes', $this->theme, 'views', '_layouts'),
 					build_path(APPPATH, 'modules', $this->module, 'views', '_layouts'),
 					build_path(APPPATH, 'views', '_layouts'),
 					build_path(VIEWPATH, '_layouts'),
@@ -1235,8 +1325,8 @@ class Theme
 					unset($paths[0], $paths[2]);
 				}
 
-				// Remove unecessary paths if $this->config['theme'] is not set
-				if ( ! isset($this->config['theme']) or empty($this->config['theme']))
+				// Remove unecessary paths if $this->theme is not set
+				if ( ! isset($this->theme) or empty($this->theme))
 				{
 					unset($paths[0], $paths[1]);
 				}
@@ -1277,8 +1367,8 @@ class Theme
 
 				// prepare all path
 				$paths = array(
-					build_path(FCPATH, 'content', 'themes', $this->config['theme'], 'views', '_modules', $this->module, '_master'),
-					build_path(FCPATH, 'content', 'themes', $this->config['theme'], 'views', '_master'),
+					build_path(FCPATH, 'content', 'themes', $this->theme, 'views', '_modules', $this->module, '_master'),
+					build_path(FCPATH, 'content', 'themes', $this->theme, 'views', '_master'),
 					build_path(APPPATH, 'modules', $this->module, 'views', '_master'),
 					build_path(APPPATH, 'views', '_master'),
 					build_path(VIEWPATH, '_master'),
@@ -1290,8 +1380,8 @@ class Theme
 					unset($paths[0], $paths[2]);
 				}
 
-				// Remove unecessary paths if $this->config['theme'] is not set
-				if ( ! isset($this->config['theme']) or empty($this->config['theme']))
+				// Remove unecessary paths if $this->theme is not set
+				if ( ! isset($this->theme) or empty($this->theme))
 				{
 					unset($paths[0], $paths[1]);
 				}
@@ -1358,6 +1448,427 @@ class Theme
 			"//&lt;![CDATA[\n".'\1'."\n//]]>"
 		), $output);
 	}
+}
+
+// ------------------------------------------------------------------------
+// Remove from theme_helper.
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('build_path'))
+{
+    /**
+     * This function smartly builds a path using DIRECTORY_SEPARATOR
+     *
+     * @param   mixed   strings or array
+     * @return  string  the full path built
+     * @author  Kader Bouyakoub <bkader@mail.com>
+     * @link    http://www.bkader.com/
+     */
+    function build_path()
+    {
+        // We build the path only if arguments are passed
+        if ( ! empty($args = func_get_args()))
+        {
+            // Make sure arguments are an array but not a mutidimensional one
+            isset($args[0]) && is_array($args[0]) && $args = $args[0];
+
+            return implode(DIRECTORY_SEPARATOR, array_map('rtrim', $args, array(DIRECTORY_SEPARATOR))).DIRECTORY_SEPARATOR;
+        }
+
+        return null;
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('assets_url'))
+{
+    /**
+     * Returns Assets URL
+     * @param   string  $uri        URI to append to URL
+     * @param   string  $folder     In case of a distinct folder
+     * @return  string
+     */
+    function assets_url($uri = '', $folder = null)
+    {
+        return get_instance()->theme->assets_url($uri, $folder);
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('css_url'))
+{
+    /**
+     * Returns the full url to css file
+     * @param   string  $file   filename with or without .css extension
+     * @return  string
+     */
+    function css_url($file = null, $folder = null)
+    {
+        return get_instance()->theme->css_url($file, $folder);
+    }
+}
+
+if ( ! function_exists('css'))
+{
+    /**
+     * Returns the full css <link> tag
+     * @param   string  $file   filename to load
+     * @param   string  $cdn    to use in case of CDN user
+     * @param   mixed   $attr   attributes to append to string
+     * @return  string
+     */
+    function css($file = null, $cdn = null, $attrs = '', $folder = null)
+    {
+        return get_instance()->theme->css($file, $cdn, $attrs, $folder);
+    }
+}
+
+// ----------------------------------------------------------------------------
+
+if ( ! function_exists('js_url'))
+{
+    /**
+     * Returns the full url to js file
+     * @param   string  $file   filename with or without .js extension
+     * @return  string
+     */
+    function js_url($file, $folder = null)
+    {
+        return get_instance()->theme->js_url($file, $folder);
+    }
+}
+
+if ( ! function_exists('js'))
+{
+    /**
+     * Returns the full JS <script> tag
+     * @param   string  $file   filename to load
+     * @param   string  $cdn    to use in case of CDN user
+     * @param   mixed   $attr   attributes to append to string
+     * @return  string
+     */
+    function js($file = null, $cdn = null, $attrs = '', $folder = null)
+    {
+        return get_instance()->theme->js($file, $cdn, $attrs, $folder);
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('meta'))
+{
+    /**
+     * Display a HTML meta tag
+     *
+     * @param   mixed   $name   string or associative array
+     * @param   string  $content  content or null if $name is array
+     * @return  string
+     */
+    function meta($name, $content = null, $type = 'meta', $attrs = array())
+    {
+        return get_instance()->theme->meta($name, $content, $type, $attrs);
+    }
+}
+
+// ----------------------------------------------------------------------------
+
+if ( ! function_exists('img_url'))
+{
+    /**
+     * Returns the full url to image file
+     * @param   string  $file       image name
+     * @param   string  $folder     in case of a distinct folder
+     * @return  string
+     */
+    function img_url($file = null, $folder = null)
+    {
+        if (filter_var($file, FILTER_VALIDATE_URL) !== false)
+        {
+            return $file;
+        }
+        $file = ($folder !== null) ? $file : 'img/'.$file;
+        return assets_url($file, $folder);
+    }
+}
+
+if ( ! function_exists('img'))
+{
+    /**
+     * Returns a full tag to image
+     * @param   string  $file       image name
+     * @param   mixed   $attrs      attributes to append
+     * @param   string  $folder     in case of a distinct folder
+     * @return  string
+     */
+    function img($file = null, $attrs = '', $folder = null)
+    {
+        if (strlen($file) > 0)
+        {
+            return '<img src="'.img_url($file, $folder).'"'._stringify_attributes($attrs).' />';
+        }
+        return null;
+    }
+}
+
+if ( ! function_exists('img_alt')) 
+{
+    /**
+     * Displays an alternative image using placehold.it website.
+     *
+     * @return  string
+     */
+    function img_alt($width, $height = null, $text = null, $background = null, $foreground = null)
+    {
+        $params = array();
+
+        if (is_array($width))
+        {
+            $params = $width;
+        }
+        else
+        {
+            $params['width']        = $width;
+            $params['height']       = $height;
+            $params['text']         = $text;
+            $params['background']   = $background;
+            $params['foreground']   = $foreground;
+        }
+
+        $params['height']       = (empty($params['height'])) ? $params['width'] : $params['height'];
+        $params['text']         = (empty($params['text'])) ? $params['width'].' x '. $params['height'] : $params['text'];
+        $params['background']   = (empty($params['background'])) ? 'CCCCCC' : $params['height'];
+        $params['foreground']   = (empty($params['foreground'])) ? '969696' : $params['foreground'];
+
+        return '<img src="http://placehold.it/'. $params['width'].'x'. $params['height'].'/'.$params['background'].'/'.$params['foreground'].'&text='. $params['text'].'" alt="Placeholder">';
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('theme_load'))
+{
+    /**
+     * Quick access to Theme::load() method.
+     * 
+     * @param   string  $view       view to load
+     * @param   array   $data       array of data to pass to view
+     * @param   bool    $return     whether to output view or not
+     * @param   string  $master     in case you use a distinct master view
+     * @return  void
+     */
+    function theme_load($view, $data = array(), $return = false, $master = 'default')
+    {
+        return get_instance()->theme->load($view, $data, $return, $master);
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('theme_render'))
+{
+	/**
+	 * Instead of chaining this class methods or calling them one by one,
+	 * this method is a shortcut to do anything you want in a single call.
+	 * @access 	public
+	 * @param 	string 	$view 		the view file to load
+	 * @param 	array 	$data 		array of data to pass to view
+	 * @param 	string 	$title 		page's title
+	 * @param 	string 	$options 	associative array of options to apply first
+	 * @param 	bool 	$return 	whether to output or simply build
+	 * NOTE: you can pass $options instead of $title like so:
+	 * 		$this->theme->render('view', $data, $options, $return);
+	 */
+	function theme_render($view, $data = array(), $title = null, $options = array(), $return = false)
+	{
+        return get_instance()->theme->render($view, $data, $title, $options, $return);
+	}
+}
+
+if ( ! function_exists('render'))
+{
+	// alias of the function above.
+	function render($view, $data = array(), $title = null, $options = array(), $return = false)
+	{
+        return get_instance()->theme->render($view, $data, $title, $options, $return);
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('theme_view'))
+{
+    /**
+     * Displays a single view alone.
+     * 
+     * @param   string  $view   the view name
+     * @param   array   $data   array of data to pass
+     * @param   bool    $return whether to return or output
+     * @return  mixed
+     */
+    function theme_view($view, $data = array(), $return = false)
+    {
+        return get_instance()->theme->view($view, $data, $return);
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('theme_partial'))
+{
+    /**
+     * Insead of using Theme::partial() method, your can use this helper
+     * function to quick load a partial view.
+     *
+     * @param   string  $view       the view file to load.
+     * @param   array   $data       array of data to pass to view.
+     * @param   bool    $return     whether to return it or not.
+     * @return  mixed
+     */
+    function theme_partial($view, $data = array(), $return = false)
+    {
+        return get_instance()->theme->partial($view, $data, $return);
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('theme_header'))
+{
+    /**
+     * Loads partial view named 'header'. This can also been done using
+     * theme_partial() function: theme_partial('header', $data, $return)
+     *
+     * @param   array   $data       array of data to pass to the view.
+     * @param   bool    $return     whether to return it or not.
+     * @return  mixed
+     */
+    function theme_header($data = array(), $return = false)
+    {
+        return theme_partial('header', $data, $return);
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('theme_footer'))
+{
+    /**
+     * Loads partial view named 'footer'. This can also been done using
+     * theme_partial() function: theme_partial('footer', $data, $return)
+     *
+     * @param   array   $data   array of data to pass to the view.
+     * @param   bool    $return     whether to return it or not.
+     * @return  mixed
+     */
+    function theme_footer($data = array(), $return = false)
+    {
+        return theme_partial('footer', $data, $return);
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('print_alert'))
+{
+    /**
+     * Prints an alert.
+     *
+     * @param   string  $message    the message to print.
+     * @param   string  $type       type of the message.
+     * @param   string  $view       by default 'alert' but can be overriden.
+     * @return  string
+     */
+    function print_alert($message = '', $type = 'info', $view = 'alert')
+    {
+        if (empty($message))
+        {
+            return null;
+        }
+
+        return theme_partial($view, array(
+            'type' => $type, 
+            'message' => $message
+        ), true);
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('set_alert'))
+{
+    /**
+     * Sets a session's flash message.
+     *
+     * Multiple messages can be set if $message is an array like so:
+     * array(
+     *     'success' => '...',
+     *     'danger'  => '...',
+     *     ...
+     * );
+     * 
+     * @param   mixed  $message    message to store
+     * @param   string  $type       type of the message
+     * @return  void
+     */
+    function set_alert($message = '', $type = 'info')
+    {
+        // If not message is set, nothing to do.
+        if (empty($message))
+        {
+            return false;
+        }
+
+        if (is_array($message))
+        {
+            foreach ($message as $_type => $_message)
+            {
+                $messages[] = array('type' => $_type, 'message' => $_message);
+            }
+        }
+        else
+        {
+            $messages[] = array('type' => $type, 'message' => $message);
+        }
+
+        // Make sure the session library is loaded
+        if ( ! class_exists('CI_Session', false))
+        {
+            get_instance()->load->library('session');
+        }
+        
+        // Set flashdata.
+        get_instance()->session->set_flashdata('__ci_flash', $messages);
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('print_flash_alert'))
+{
+    /**
+     * Prints already stored flashdata messages.
+     *
+     * @param   string  $view   overrides alert.php view file.
+     * @return  string
+     */
+    function print_flash_alert($view = 'alert')
+    {
+        if (isset($_SESSION['__ci_flash']) && is_array($_SESSION['__ci_flash']))
+        {
+            $output = '';
+
+            foreach ($_SESSION['__ci_flash'] as $message)
+            {
+                $output .= print_alert($message['message'], $message['type'], $view);
+            }
+
+            return $output;
+        }
+
+        return null;
+    }
 }
 
 /* End of file Theme.php */

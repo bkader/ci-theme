@@ -49,6 +49,7 @@ if ( ! function_exists('assets_url'))
      */
     function assets_url($uri = '', $folder = null)
     {
+        (class_exists('Theme', false)) OR get_instance()->load->library('theme');
         return get_instance()->theme->assets_url($uri, $folder);
     }
 }
@@ -64,6 +65,7 @@ if ( ! function_exists('css_url'))
      */
     function css_url($file = null, $folder = null)
     {
+        (class_exists('Theme', false)) OR get_instance()->load->library('theme');
         return get_instance()->theme->css_url($file, $folder);
     }
 }
@@ -79,6 +81,7 @@ if ( ! function_exists('css'))
      */
     function css($file = null, $cdn = null, $attrs = '', $folder = null)
     {
+        (class_exists('Theme', false)) OR get_instance()->load->library('theme');
         return get_instance()->theme->css($file, $cdn, $attrs, $folder);
     }
 }
@@ -94,6 +97,7 @@ if ( ! function_exists('js_url'))
      */
     function js_url($file, $folder = null)
     {
+        (class_exists('Theme', false)) OR get_instance()->load->library('theme');
         return get_instance()->theme->js_url($file, $folder);
     }
 }
@@ -109,6 +113,7 @@ if ( ! function_exists('js'))
      */
     function js($file = null, $cdn = null, $attrs = '', $folder = null)
     {
+        (class_exists('Theme', false)) OR get_instance()->load->library('theme');
         return get_instance()->theme->js($file, $cdn, $attrs, $folder);
     }
 }
@@ -124,9 +129,10 @@ if ( ! function_exists('meta'))
      * @param   string  $content  content or null if $name is array
      * @return  string
      */
-    function meta($name, $content = null, array $attrs = array(), $type = 'name')
+    function meta($name, $content = null, $type = 'meta', $attrs = array())
     {
-        return get_instance()->theme->meta($name, $content, $attrs, $type);
+        (class_exists('Theme', false)) OR get_instance()->load->library('theme');
+        return get_instance()->theme->meta($name, $content, $type, $attrs);
     }
 }
 
@@ -205,7 +211,7 @@ if ( ! function_exists('img_alt'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('theme_view'))
+if ( ! function_exists('theme_load'))
 {
     /**
      * Quick access to Theme::load() method.
@@ -216,15 +222,49 @@ if ( ! function_exists('theme_view'))
      * @param   string  $master     in case you use a distinct master view
      * @return  void
      */
-    function theme_view($view, $data = array(), $return = false, $master = 'template')
+    function theme_load($view, $data = array(), $return = false, $master = 'default')
     {
+        (class_exists('Theme', false)) OR get_instance()->load->library('theme');
         return get_instance()->theme->load($view, $data, $return, $master);
     }
 }
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('load_view'))
+if ( ! function_exists('theme_render'))
+{
+    /**
+     * Instead of chaining this class methods or calling them one by one,
+     * this method is a shortcut to do anything you want in a single call.
+     * @access  public
+     * @param   string  $view       the view file to load
+     * @param   array   $data       array of data to pass to view
+     * @param   string  $title      page's title
+     * @param   string  $options    associative array of options to apply first
+     * @param   bool    $return     whether to output or simply build
+     * NOTE: you can pass $options instead of $title like so:
+     *      $this->theme->render('view', $data, $options, $return);
+     */
+    function theme_render($view, $data = array(), $title = null, $options = array(), $return = false)
+    {
+        (class_exists('Theme', false)) OR get_instance()->load->library('theme');
+        return get_instance()->theme->render($view, $data, $title, $options, $return);
+    }
+}
+
+if ( ! function_exists('render'))
+{
+    // alias of the function above.
+    function render($view, $data = array(), $title = null, $options = array(), $return = false)
+    {
+        (class_exists('Theme', false)) OR get_instance()->load->library('theme');
+        return get_instance()->theme->render($view, $data, $title, $options, $return);
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('theme_view'))
 {
     /**
      * Displays a single view alone.
@@ -234,8 +274,9 @@ if ( ! function_exists('load_view'))
      * @param   bool    $return whether to return or output
      * @return  mixed
      */
-    function load_view($view, $data = array(), $return = false)
+    function theme_view($view, $data = array(), $return = false)
     {
+        (class_exists('Theme', false)) OR get_instance()->load->library('theme');
         return get_instance()->theme->view($view, $data, $return);
     }
 }
@@ -255,6 +296,7 @@ if ( ! function_exists('theme_partial'))
      */
     function theme_partial($view, $data = array(), $return = false)
     {
+        (class_exists('Theme', false)) OR get_instance()->load->library('theme');
         return get_instance()->theme->partial($view, $data, $return);
     }
 }
@@ -273,6 +315,7 @@ if ( ! function_exists('theme_header'))
      */
     function theme_header($data = array(), $return = false)
     {
+        (class_exists('Theme', false)) OR get_instance()->load->library('theme');
         return theme_partial('header', $data, $return);
     }
 }
@@ -291,6 +334,7 @@ if ( ! function_exists('theme_footer'))
      */
     function theme_footer($data = array(), $return = false)
     {
+        (class_exists('Theme', false)) OR get_instance()->load->library('theme');
         return theme_partial('footer', $data, $return);
     }
 }
@@ -314,12 +358,7 @@ if ( ! function_exists('print_alert'))
             return null;
         }
 
-        // Make sure the Theme library is loaded.
-        if ( ! class_exists('Theme', false))
-        {
-            get_instance()->load->library('theme');
-        }
-
+        (class_exists('Theme', false)) OR get_instance()->load->library('theme');
         return theme_partial($view, array(
             'type' => $type, 
             'message' => $message

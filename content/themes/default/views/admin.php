@@ -1,4 +1,4 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?><div class="col-xs-12 col-sm-8">
+<div class="col-xs-12 col-sm-8">
 	<div class="panel panel-default">
 		<div class="panel-body">
 			<h1 class="page-header" style="margin-top: 0;">Admin Panel</h1>
