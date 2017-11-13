@@ -1,4 +1,4 @@
-#CodeIgniter Theme Library
+# CodeIgniter Theme Library
 There are plenty of CodeIgniter template library. I tried most of them and I must say that they rock. Though, I had to make my own that suits my needs and that may be easy to implement, easy to understand and easy to use.
 
 ## What is this library about?
