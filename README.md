@@ -85,6 +85,36 @@ The library will search inside these folders in the following order:
 4. **module_location**/**module_name**/views/_master/
 5. **views_path**/_master/
 
+## How to use?
+Load the library where you want to use or you can autoload it inside **autoload.php** file.
+
+`$autoload['libraries'] = array('theme');`
+
+In your controller, simple use library's method or chain them (ones that can be chained). Example (see: *controllers/Example.php*)
+
+    $this->theme
+        ->title('Title Goes Here')
+        ->add_css('added_css1', 'added_css2')
+        ->append_css('appended_css1'),
+        ->add_js('added_js1'),
+        ->append_js('appended_js1')
+        ->add_partial('header')
+        ->load('view_file', $data);
+
+There is a short version of all this but in case you want to add partial views you have to use `$this->theme->add_partial()` before using the function.
+
+    $this->theme
+	    ->add_partial('header')
+	    ->add_partial('footer');
+	
+	render('view_file', $data, 'Title Goes Here', array(
+	    // Available options.
+	    'css'        => array('added_css1', 'added_css2'),
+	    'append_css' => 'appended_css1',
+	    'js'         => 'added_js1',
+	    'append_js'  => 'appended_js1',
+	));
+
 Feel free to explore the library to know more about it and if you have any questions, I am here to answer as long as I am still alive.
 
 #CREDITS
