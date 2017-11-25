@@ -1,6 +1,26 @@
 # CodeIgniter Theme Library
 There are plenty of CodeIgniter template library. I tried most of them and I must say that they rock. Though, I had to make my own that suits my needs and that may be easy to implement, easy to understand and easy to use.
 
+### UPDATED  
+**assets_url()** removed because it was kind of useless but the following methods were added:  
+    get_theme_url()
+    theme_url()
+    get_theme_path()
+    theme_path()
+    get_upload_url()
+    upload_url()
+    get_upload_path()
+    upload_path()
+    get_common_url()
+    common_url()
+    get_common_path()
+    common_path()
+
+All methods with **get_** will simply return the string while those without it will echo it.  
+Example:  
+    theme_url('css/style.css'); // Output: ...com/content/themes/THEME/css/style.css
+
+
 ## What is this library about?
 It offers you the possibility to implement theming feature to your CodeIgniter applications with simple folders structure and ease of use (It works even when using **HMVC**).
 
