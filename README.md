@@ -3,18 +3,18 @@ There are plenty of CodeIgniter template library. I tried most of them and I mus
 
 ### UPDATED  
 **assets_url()** removed because it was kind of useless but the following methods were added:  
-    get_theme_url()
-    theme_url()
-    get_theme_path()
-    theme_path()
-    get_upload_url()
-    upload_url()
-    get_upload_path()
-    upload_path()
-    get_common_url()
-    common_url()
-    get_common_path()
-    common_path()
+* get_theme_url()
+* theme_url()
+* get_theme_path()
+* theme_path()
+* get_upload_url()
+* upload_url()
+* get_upload_path()
+* upload_path()
+* get_common_url()
+* common_url()
+* get_common_path()
+* common_path()
 
 All methods with **get_** will simply return the string while those without it will echo it.  
 Example:  
