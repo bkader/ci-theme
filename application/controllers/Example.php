@@ -62,8 +62,8 @@ class Example extends CI_Controller
 		 * @see Theme.php:1057
 		 */
 		render('example', null, 'Semantic Theme', array(
-			'css' => 'style',	// as string
-			'js' => array('scritps') // as array for multiple files.
+			'css' => 'assets/css/style',	// as string
+			'js' => array('assets/js/scripts') // as array for multiple files.
 		));
 	}
 }

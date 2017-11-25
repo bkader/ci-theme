@@ -1,5 +1,6 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
+defined('DS') or define('DS', DIRECTORY_SEPARATOR);
 /**
  * Theme Library
  * @package 	CodeIgniter\Designith
@@ -472,60 +473,34 @@ class Theme
     // ------------------------------------------------------------------------
 
 	/**
-	 * Returns the URL to assets folder
+	 * Returns the URL to the theme's folder.
 	 * @access 	public
-	 * @param 	string 	$uri
-	 * @param 	string 	$folder 	in case of distinct folder
+	 * @param 	string 	$uri 	in case you want to link a file.
 	 * @return 	string
 	 */
-	public function assets_url($uri = '', $folder = null)
+	public function theme_url($uri = '')
 	{
-		if (filter_var($uri, FILTER_VALIDATE_URL) !== false)
-		{
-			return $uri;
-		}
+		(function_exists('base_url')) OR $this->CI->load->helper('url');
 
-		if (empty($folder))
-		{
-			$folder = "themes/{$this->theme}";
-		}
+		$url = ($this->cdn_enabled == true && ! empty($this->cdn_server))
+			? $this->cdn_server
+			: base_url();
+		return preg_replace(
+			'/([^:])(\/{2,})/',
+			'$1/',
+			"{$url}/content/themes/{$this->theme}/{$uri}"
+		);
+	}
 
-		/**
-		 * In case your files are hosting on another server (CDN), folder
-		 * structure will be slightly different:
-		 *
-		 *	your_cdn.com/content/themes/_THEME_/css/file.css
-		 *
-		 * In case of locally hosted files, the URL would be:
-		 * 	your_site.com/content/themes/_THEME_/assets/css/file.css
-		 * 	
-		 */
-		if ($this->cdn_enabled && $this->cdn_server)
-		{
-			$assets_url = "{$this->cdn_server}content/{$folder}/{$uri}";
-		}
-		else
-		{
-			/**
-			 * The reason I am using this if statement is to append or not
-			 * 'assets' folder to the given $folder.
-			 * Example:
-			 * 	Using css('file') without the 4th argument will result in:
-			 * 	<link ... src=".../content/themes/_THEME_/assets/css/file.css"
-			 *
-			 * But if you specify the 4th argument (distinct folder), you get:
-			 * 	<link ... src=".../content/_FOLDER_/css/file.css"
-			 * (without 'assets' being appended)
-			 */
-			if (strpos($folder, $this->theme) !== false)
-			{
-				$folder .= "/assets";
-			}
-
-			$assets_url = $this->CI->config->base_url("content/{$folder}/{$uri}");
-		}
-
-		return $assets_url;
+	/**
+	 * Returns the real path to the theme folder.
+	 * @access 	public
+	 * @param 	string 	$uri 	file name.
+	 * @return 	string 	the path if found, else FALSE.
+	 */
+	public function theme_path($uri = '')
+	{
+		return realpath($this->theme_path.$uri);
 	}
 
 	/**
@@ -534,9 +509,52 @@ class Theme
 	 * @param 	string 	$uri 	path to file
 	 * @return 	string
 	 */
-	public function uploads_url($uri = '')
+	public function upload_url($uri = '')
 	{
-		return $this->assets_url($uri, 'uploads');
+		(function_exists('base_url')) OR $this->CI->load->helper('url');
+		return preg_replace(
+			'/([^:])(\/{2,})/',
+			'$1/',
+			base_url("content/uploads/{$uri}")
+		);
+	}
+
+	/**
+	 * Returns the real path to the uploads folder.
+	 * @access 	public
+	 * @param 	string 	$uri 	file name.
+	 * @return 	string 	the path if found, else FALSE.
+	 */
+	public function upload_path($uri = '')
+	{
+		return realpath(FCPATH."content/uploads/{$uri}");
+	}
+
+	/**
+	 * Changes the folder to 'common' folder.
+	 * @access 	public
+	 * @param 	string 	$uri 	path to file
+	 * @return 	string
+	 */
+	public function common_url($uri = '')
+	{
+		(function_exists('base_url')) OR $this->CI->load->helper('url');
+		return preg_replace(
+			'/([^:])(\/{2,})/',
+			'$1/',
+			base_url("content/common/{$uri}")
+		);
+	}
+
+	/**
+	 * Returns the real path to the common folder.
+	 * @access 	public
+	 * @param 	string 	$uri 	file name.
+	 * @return 	string 	the path if found, else FALSE.
+	 */
+	public function common_path($uri = '')
+	{
+		return realpath(FCPATH."content/common/{$uri}");
 	}
 
     // ------------------------------------------------------------------------
@@ -641,6 +659,7 @@ class Theme
     	// If a valid URL is passed, we simply return it
         if (filter_var($file, FILTER_VALIDATE_URL) !== false) 
         {
+
         	return $this->_remove_extension($file, '.css').'.css';
         }
 
@@ -651,9 +670,20 @@ class Theme
             $file = $args[0];
             $ver  = '?'.$args[1];
         }
+        $file = $this->_remove_extension($file, '.css').'.css';
 
-        $file = $this->_remove_extension($file).'.css';
-        return $this->assets_url("css/{$file}{$ver}", $folder);
+        if ($folder !== null)
+        {
+        	$url = base_url("content/{$folder}");
+        }
+        else
+        {
+        	$url = $this->theme_url();
+        }
+
+        $url .= (strstr($file, '/')) ? "/{$file}{$ver}" : "/css/{$file}{$ver}";
+
+		return preg_replace('/([^:])(\/{2,})/', '$1/', $url);
     }
 
     /**
@@ -671,7 +701,7 @@ class Theme
         if ($file) 
         {
         	// Use the 2nd parameter if it's set & the CDN use is enabled.
-            $this->cdn_enabled && $cdn !== null && $file = $cdn;
+            ($this->cdn_enabled && $cdn !== null) && $file = $cdn;
 
             // Return the full link tag
             return '<link rel="stylesheet" type="text/css" href="'.$this->css_url($file, $folder).'"'._stringify_attributes($attrs).'>'."\n";
@@ -795,7 +825,19 @@ class Theme
             $ver  = '?'.$args[1];
         }
         $file = $this->_remove_extension($file, '.js').'.js';
-        return $this->assets_url('js/'.$file.$ver, $folder);
+
+        if ($folder !== null)
+        {
+        	$url = base_url("content/{$folder}");
+        }
+        else
+        {
+        	$url = $this->theme_url();
+        }
+
+        $url .= (strstr($file, '/')) ? "/{$file}{$ver}" : "/js/{$file}{$ver}";
+
+		return preg_replace('/([^:])(\/{2,})/', '$1/', $url);
     }
 
     /**
@@ -813,7 +855,7 @@ class Theme
         if ($file)
         {
         	// Use the 2nd parameter if it's set & the CDN use is enabled.
-            $this->cdn_enabled && $cdn !== null && $file = $cdn;
+            ($this->cdn_enabled && $cdn !== null) && $file = $cdn;
             return '<script type="text/javascript" src="'.$this->js_url($file, $folder).'"'._stringify_attributes($attrs).'></script>'."\n";
         }
         return null;
@@ -1453,7 +1495,7 @@ class Theme
 if ( ! function_exists('build_path'))
 {
     /**
-     * This function smartly builds a path using DIRECTORY_SEPARATOR
+     * This function smartly builds a path using DS
      *
      * @param   mixed   strings or array
      * @return  string  the full path built
@@ -1468,7 +1510,7 @@ if ( ! function_exists('build_path'))
             // Make sure arguments are an array but not a mutidimensional one
             isset($args[0]) && is_array($args[0]) && $args = $args[0];
 
-            return implode(DIRECTORY_SEPARATOR, array_map('rtrim', $args, array(DIRECTORY_SEPARATOR))).DIRECTORY_SEPARATOR;
+            return implode(DS, array_map('rtrim', $args, array(DS))).DS;
         }
 
         return null;
@@ -1477,18 +1519,164 @@ if ( ! function_exists('build_path'))
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('assets_url'))
+if ( ! function_exists('get_theme_url'))
 {
-    /**
-     * Returns Assets URL
-     * @param   string  $uri        URI to append to URL
-     * @param   string  $folder     In case of a distinct folder
-     * @return  string
-     */
-    function assets_url($uri = '', $folder = null)
-    {
-        return get_instance()->theme->assets_url($uri, $folder);
-    }
+	/**
+	 * Returns the URL to the theme folder.
+	 * @param 	string 	$uri 	string to be appended.
+	 * @return 	string.
+	 */
+	function get_theme_url($uri = '')
+	{
+		return get_instance()->theme->theme_url($uri);
+	}
+}
+
+if ( ! function_exists('theme_url'))
+{
+	/**
+	 * Unlike the function above, this one echoes the URL.
+	 * @param 	string 	$uri 	string to be appended.
+	 */
+	function theme_url($uri = '')
+	{
+		echo get_instance()->theme->theme_url($uri);
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('get_theme_path'))
+{
+	/**
+	 * Returns the URL to the theme folder.
+	 * @param 	string 	$uri 	string to be appended.
+	 * @return 	string.
+	 */
+	function get_theme_path($uri = '')
+	{
+		return get_instance()->theme->theme_path($uri);
+	}
+}
+
+if ( ! function_exists('theme_path'))
+{
+	/**
+	 * Unlike the function above, this one echoes the URL.
+	 * @param 	string 	$uri 	string to be appended.
+	 */
+	function theme_path($uri = '')
+	{
+		echo get_instance()->theme->theme_path($uri);
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('get_upload_url'))
+{
+	/**
+	 * Returns the URL to the uploads folder.
+	 * @param 	string 	$uri 	string to be appended.
+	 * @return 	string.
+	 */
+	function get_upload_url($uri = '')
+	{
+		return get_instance()->theme->upload_url($uri);
+	}
+}
+
+if ( ! function_exists('upload_url'))
+{
+	/**
+	 * Unlike the function above, this one echoes the URL.
+	 * @param 	string 	$uri 	string to be appended.
+	 */
+	function upload_url($uri = '')
+	{
+		echo get_instance()->theme->upload_url($uri);
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('get_upload_path'))
+{
+	/**
+	 * Returns the URL to the uploads folder.
+	 * @param 	string 	$uri 	string to be appended.
+	 * @return 	string.
+	 */
+	function get_upload_path($uri = '')
+	{
+		return get_instance()->theme->upload_path($uri);
+	}
+}
+
+if ( ! function_exists('upload_path'))
+{
+	/**
+	 * Unlike the function above, this one echoes the URL.
+	 * @param 	string 	$uri 	string to be appended.
+	 */
+	function upload_path($uri = '')
+	{
+		echo get_instance()->theme->upload_path($uri);
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('get_common_url'))
+{
+	/**
+	 * Returns the URL to the commons folder.
+	 * @param 	string 	$uri 	string to be appended.
+	 * @return 	string.
+	 */
+	function get_common_url($uri = '')
+	{
+		return get_instance()->theme->common_url($uri);
+	}
+}
+
+if ( ! function_exists('common_url'))
+{
+	/**
+	 * Unlike the function above, this one echoes the URL.
+	 * @param 	string 	$uri 	string to be appended.
+	 */
+	function common_url($uri = '')
+	{
+		echo get_instance()->theme->common_url($uri);
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('get_common_path'))
+{
+	/**
+	 * Returns the URL to the commons folder.
+	 * @param 	string 	$uri 	string to be appended.
+	 * @return 	string.
+	 */
+	function get_common_path($uri = '')
+	{
+		return get_instance()->theme->common_path($uri);
+	}
+}
+
+if ( ! function_exists('common_path'))
+{
+	/**
+	 * Unlike the function above, this one echoes the URL.
+	 * @param 	string 	$uri 	string to be appended.
+	 */
+	function common_path($uri = '')
+	{
+		echo get_instance()->theme->common_path($uri);
+	}
 }
 
 // ------------------------------------------------------------------------
@@ -1582,10 +1770,19 @@ if ( ! function_exists('img_url'))
     {
         if (filter_var($file, FILTER_VALIDATE_URL) !== false)
         {
-            return $file;
+        	return preg_replace('/([^:])(\/{2,})/', '$1/', $file);
         }
-        $file = ($folder !== null) ? $file : 'img/'.$file;
-        return assets_url($file, $folder);
+
+        if ($folder !== null)
+        {
+        	$url = base_url("content/{$folder}/{$file}");
+        }
+        else
+        {
+        	$url = theme_url($file);
+        }
+
+        return preg_replace('/([^:])(\/{2,})/', '$1/', $url);
     }
 }
 
@@ -1639,6 +1836,42 @@ if ( ! function_exists('img_alt'))
 
         return '<img src="http://placehold.it/'. $params['width'].'x'. $params['height'].'/'.$params['background'].'/'.$params['foreground'].'&text='. $params['text'].'" alt="Placeholder">';
     }
+}
+
+// ------------------------------------------------------------------------
+
+
+if ( ! function_exists('theme_set'))
+{
+	/**
+	 * Sets variables to pass to view files.
+	 * @access 	public
+	 * @param 	mixed 		$var 		property's name or associative array
+	 * @param 	mixed 		$val 		property's value or null if $var is array
+	 * @param 	boolean 	$global 	make property global or not
+	 * @return 	instance of class
+	 */
+	function theme_set($var, $val = null, $global = false)
+	{
+		return get_instance()->theme->get($var, $val, $global);
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('theme_get'))
+{
+	/**
+	 * Returns a data store in class Config property
+	 * @access 	public
+	 * @param 	string 	$name
+	 * @param 	string 	$index
+	 * @return 	mixed
+	 */
+	function theme_get($name, $index = null)
+	{
+		return get_instance()->theme->get($name, $index);
+	}
 }
 
 // ------------------------------------------------------------------------
@@ -1783,7 +2016,7 @@ if ( ! function_exists('print_alert'))
             return null;
         }
 
-        return theme_partial($view, array(
+        return get_instance()->theme->partial($view, array(
             'type' => $type, 
             'message' => $message
         ), true);
