@@ -141,12 +141,6 @@ class Theme
 			$this->config['manifest'] = $manifest;
 		}
 
-		// Does the theme have functions.php file?
-		if (file_exists($this->theme_path.'functions.php'))
-		{
-			include_once($this->theme_path.'functions.php');
-		}
-
 		// Create class properties.
 		foreach ($this->config as $key => $val)
 		{
@@ -388,8 +382,6 @@ class Theme
     	return $this;
     }
 
-    // public function append_meta($name, $content = null)
-
     /**
      * Display a HTML meta tag
      *
@@ -584,7 +576,7 @@ class Theme
 	 * @param 	mixed 	string|strings or array.
 	 * @return 	object
 	 */
-	public function append_css()
+	public function prepend_css()
 	{
 		if ( ! empty($css = func_get_args()))
 		{
@@ -737,7 +729,7 @@ class Theme
 	 * @param 	mixed 	string|strings or array.
 	 * @return 	object
 	 */
-	public function append_js()
+	public function prepend_js()
 	{
 		if ( ! empty($js = func_get_args()))
 		{
@@ -1176,6 +1168,12 @@ class Theme
 	 */
 	protected function _build_theme_output($view, $data = array())
 	{
+		// Does the theme have functions.php file?
+		if (file_exists($this->theme_path.'functions.php'))
+		{
+			include_once($this->theme_path.'functions.php');
+		}
+
 		// Always set page title
 		empty($this->title) && $this->title();
 
