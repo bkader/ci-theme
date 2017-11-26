@@ -69,7 +69,7 @@ Other files are simply either **css**, **js** or **images**.
  - **assets_url** and **uploads_url**: both return the full URL to their respective folders. (_content/assets_ and _content/uploads_)
  - Methods on **CSS** and **JS** (I use **x** to represente them both):
 	 - **add_x**: adds the file to files list.
-	 - **append_x**: adds the at the beginning of files list.
+	 - **prepend_x**: adds the at the beginning of files list.
 	 - **remove_x**: remove a file from files list.
 	 - **replace_x**: replaces a file by a new one.
 	 - **get_x**: returns an array of loaded **X** files.
@@ -115,9 +115,9 @@ In your controller, simple use library's method or chain them (ones that can be 
     $this->theme
         ->title('Title Goes Here')
         ->add_css('added_css1', 'added_css2')
-        ->append_css('appended_css1'),
+        ->prepend_css('prepended_css1'),
         ->add_js('added_js1'),
-        ->append_js('appended_js1')
+        ->prepend_js('prepended_js1')
         ->add_partial('header')
         ->load('view_file', $data);
 
@@ -130,9 +130,9 @@ There is a short version of all this but in case you want to add partial views y
 	render('view_file', $data, 'Title Goes Here', array(
 	    // Available options.
 	    'css'        => array('added_css1', 'added_css2'),
-	    'append_css' => 'appended_css1',
+	    'prepend_css' => 'prepended_css1',
 	    'js'         => 'added_js1',
-	    'append_js'  => 'appended_js1',
+	    'prepend_js'  => 'prepended_js1',
 	));
 
 Feel free to explore the library to know more about it and if you have any questions, I am here to answer as long as I am still alive.
