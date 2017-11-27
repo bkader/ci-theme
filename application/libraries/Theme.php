@@ -267,6 +267,8 @@ class Theme
 	public function theme($theme = 'default')
 	{
 		$this->theme = $theme;
+		// Added 2017/11/27 @ 02:30 am.
+		$this->theme_path = FCPATH."content/themes/{$this->theme}/";
 		return $this;
 	}
 
