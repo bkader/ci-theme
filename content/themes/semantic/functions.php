@@ -13,4 +13,25 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @link 	https://twitter.com/KaderBouyakoub
  */
 
-// Add your functions here
+if ( ! function_exists('setup_assets')):
+
+	/**
+	 * Adding theme assets.
+	 */
+	function setup_assets()
+	{
+		// StyleSheets
+		add_style(
+			'semantic',	// Handle
+			get_theme_url('assets/css/semantic.min.css'), // URL to file.
+			null,	// Version.
+			true	// Prepended or not
+		);
+		add_style('style', get_theme_url('assets/css/style.css'));
+
+		// JavaScripts.
+		add_script('semantic', get_theme_url('assets/js/semantic.min'));
+	}
+
+setup_assets();
+endif;

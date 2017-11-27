@@ -14,7 +14,7 @@ class Example extends CI_Controller
 		$this->load->library('theme');
 
 		// Github buttons (Remove this please)
-		$this->theme->add_js('https://buttons.github.io/buttons.js');
+		$this->theme->add_js('github-buttons', 'https://buttons.github.io/buttons.js', null);
 	}
 
 	public function index()
@@ -61,9 +61,6 @@ class Example extends CI_Controller
 		 * Or for the shorthand version.
 		 * @see Theme.php:1057
 		 */
-		render('example', null, 'Semantic Theme', array(
-			'css' => 'assets/css/style',	// as string
-			'js' => array('assets/js/scripts') // as array for multiple files.
-		));
+		render('example', null, 'Semantic Theme');
 	}
 }

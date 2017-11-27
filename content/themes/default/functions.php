@@ -13,8 +13,30 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @link 	https://twitter.com/KaderBouyakoub
  */
 
-if ( ! function_exists('bs_alert'))
-{
+if ( ! function_exists('setup_assets')):
+
+	/**
+	 * Adding theme assets.
+	 */
+	function setup_assets()
+	{
+		// StyleSheets
+		add_style(
+			'bootstrap',	// Handle
+			get_theme_url('assets/css/bootstrap.min.css'), // URL to file.
+			null,	// Version.
+			true	// Prepended or not
+		);
+		add_style('style', get_theme_url('assets/css/style.css'));
+
+		// JavaScripts.
+		add_script('bootstrap', get_theme_url('assets/js/bootstrap.min'));
+	}
+
+setup_assets();
+endif;
+
+if ( ! function_exists('bs_alert')):
 	/**
 	 * Returns a Bootstrap alert.
 	 *
@@ -43,4 +65,5 @@ END;
 			$alert
 		);
 	}
-}
+
+endif;

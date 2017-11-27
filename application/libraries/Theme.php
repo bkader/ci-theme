@@ -42,6 +42,15 @@ class Theme
 	protected $metadata  = array();
 
 	/**
+	 * Array of appended CSS and JS files.
+	 */
+	protected $prepended_css = array();
+	protected $prepended_js = array();
+	
+	protected $inline_css = array();
+	protected $inline_js = array();
+
+	/**
 	 * Array of partial views to use.
 	 * @var 	array
 	 */
@@ -267,6 +276,7 @@ class Theme
 	public function theme($theme = 'default')
 	{
 		$this->theme = $theme;
+		$this->theme_path = realpath(FCPATH."content/themes/{$this->theme}/").DS;
 		return $this;
 	}
 
@@ -492,7 +502,7 @@ class Theme
 	 */
 	public function theme_path($uri = '')
 	{
-		return realpath($this->theme_path.$uri);
+		return str_replace(array('/', '\\'), DS, $this->theme_path.$uri);
 	}
 
 	/**
@@ -519,7 +529,7 @@ class Theme
 	 */
 	public function upload_path($uri = '')
 	{
-		return realpath(FCPATH."content/uploads/{$uri}");
+		return str_replace(array('/', '\\'), DS, FCPATH."content/uploads/$uri");
 	}
 
 	/**
@@ -546,88 +556,241 @@ class Theme
 	 */
 	public function common_path($uri = '')
 	{
-		return realpath(FCPATH."content/common/{$uri}");
+		return str_replace(array('/', '\\'), DS, FCPATH."content/common/$uri");
+	}
+
+	// ------------------------------------------------------------------------
+
+	/**
+	 * Add any type of CSS of JS files.
+	 * @access 	public
+	 * @param 	string 	$type 		type of file to add.
+	 * @param 	string 	$file 		the file to add.
+	 * @param 	string 	$handle 	the ID of the file.
+	 * @param 	int 	$ver 		the version of the file.
+	 * @param 	bool 	$prepend 	the file should be appended or prepended
+	 * @return 	object 	instance of this class.
+	 */
+	public function add($type = 'css', $file = null, $handle = null, $ver = null, $prepend = false, array $attrs = array())
+	{
+		// If no file provided, nothing to do.
+		if (empty($file))
+		{
+			return $this;
+		}
+
+		// We start by removing the extension.
+		$file = $this->_remove_extension($file, ".{$type}");
+
+		// If the $handle is not provided, we generate it.
+		if (empty($handle))
+		{
+			// We remplace all dots by dashes.
+			$handle = preg_replace('/\./', '-', basename($file));
+			$handle = preg_replace("/-{$type}$/", '', $handle)."-{$type}";
+		}
+		else
+		{
+			$handle = preg_replace("/-{$type}$/", '', $handle)."-{$type}";
+			$attributes['id'] = $handle;
+		}
+
+		// Put back the extension to the file.
+		$file .= ".{$type}";
+
+		/**
+		 * If the file is a full url (cdn or using get_theme_url(..))
+		 * we use as it is, otherwise, we force get_theme_url()
+		 */
+		if (false === filter_var($file, FILTER_VALIDATE_URL))
+		{
+			$file = $this->theme_url($file);
+		}
+
+		// If the version is provided, use it.
+		if ( ! empty($ver))
+		{
+			$file .= "?ver={$ver}";
+		}
+
+		if ($type == 'css')
+		{
+			$attributes['rel']  = 'stylesheet';
+			$attributes['type'] = 'text/css';
+			$attributes['href'] = $file;
+		}
+		else // js file.
+		{
+			$attributes['type'] = 'text/javascript';
+			$attributes['src'] = $file;
+		}
+
+		// Merge any additional attributes.
+		$attributes = array_replace_recursive($attributes, $attrs);
+
+		// Let's now add the file.
+
+		// Should the file be prepended.
+		if ($prepend === true OR 'jquery-js' == $handle)
+		{
+			// We first add it to the $prepended_xx array.
+			$this->{"prepended_{$type}"}[$handle] = $attributes;
+
+			// We merge everything.
+			$this->{"{$type}_files"} = array_replace_recursive(
+				$this->{"prepended_{$type}"},
+				$this->{"{$type}_files"}
+			);
+
+			// Don't go further.
+			return $this;
+		}
+
+		$this->{"{$type}_files"}[$handle] = $attributes;
+		return $this;
+	}
+
+	/**
+	 * Simply remove any added files.
+	 * @access 	public
+	 * @param 	string 	$type 		the file's type to remove.
+	 * @param 	string 	$handle 	the file key.
+	 * @param 	string 	$group 		what group to target.
+	 * @return 	void
+	 */
+	public function remove($type = 'css', $handle = null)
+	{
+		// If no $handle provided, nothing to do, sorry!
+		if (empty($handle))
+		{
+			return $this;
+		}
+
+		// Let's make $handle nicer :)/
+		$handle = preg_replace("/-{$type}$/", '', $handle)."-{$type}";
+		$this->{"{$type}_files"}[$handle] = false;
+
+
+		return $this;
+	}
+
+	/**
+	 * Remplaces any file by another.
+	 * @access 	public
+	 * @param 	string 	$type 		type of file to add.
+	 * @param 	string 	$file 		the file to add.
+	 * @param 	string 	$handle 	the ID of the file.
+	 * @param 	int 	$ver 		the version of the file.
+	 * @param 	bool 	$attrs 		new files attributes.
+	 * @return 	object 	instance of this class.
+	 */
+	/**
+	 * Replaces a file with another one.
+	 */
+	public function replace($type = 'css', $file = null, $handle = null, $ver = null, array $attrs = array())
+	{
+		// If no file provided, nothing to do.
+		if (empty($file))
+		{
+			return $this;
+		}
+
+		// We start by removing the extension.
+		$file = $this->_remove_extension($file, ".{$type}");
+
+		// If the $handle is not provided, we generate it.
+		if (empty($handle))
+		{
+			// We remplace all dots by dashes.
+			$handle = preg_replace('/\./', '-', basename($file));
+			$handle = preg_replace("/-{$type}$/", '', $handle)."-{$type}";
+		}
+		else
+		{
+			$handle = preg_replace("/-{$type}$/", '', $handle)."-{$type}";
+			$attributes['id'] = $handle;
+		}
+
+		// Put back the extension to the file.
+		$file .= ".{$type}";
+
+		/**
+		 * If the file is a full url (cdn or using get_theme_url(..))
+		 * we use as it is, otherwise, we force get_theme_url()
+		 */
+		if (false === filter_var($file, FILTER_VALIDATE_URL))
+		{
+			$file = $this->theme_url($file);
+		}
+
+		// If the version is provided, use it.
+		if ( ! empty($ver))
+		{
+			$file .= "?ver={$ver}";
+		}
+
+		if ($type == 'css')
+		{
+			$attributes['rel']  = 'stylesheet';
+			$attributes['type'] = 'text/css';
+			$attributes['href'] = $file;
+		}
+		else // js file.
+		{
+			$attributes['type'] = 'text/javascript';
+			$attributes['src'] = $file;
+		}
+
+		// Merge any additional attributes.
+		$attributes = array_replace_recursive($attributes, $attrs);
+
+		// We replace the file if found.
+
+		$this->{"{$type}_files"}[$handle] = $attributes;
+		return $this;
+	}
+
+	public function add_inline($type = 'css', $content = '', $handle = null)
+	{
+		$handle = preg_replace("/-{$type}$/", '', $handle)."-{$type}";
+		$this->{'inline_'.$type}[$handle] = $content;
+		return $this;
 	}
 
     // ------------------------------------------------------------------------
 
 	/**
-	 * pushes css files to the css_files array
+	 * pushes a css file into to the css_files array
 	 * @access 	public
 	 * @param 	mixed 	string|strings or array
 	 * @return 	object
 	 */
-	public function add_css()
+	public function add_css($handle = '', $file = '', $ver = null, $prepend = false, array $attrs = array())
 	{
-		if ( ! empty($css = func_get_args()))
-		{
-			is_array($css[0]) && $css = $css[0];
-			$css = $this->_remove_extension($css, '.css');
-			$this->css_files = array_merge($this->css_files, $css);
-		}
-
-		return $this;
+		return $this->add('css', $file, $handle, $ver, $prepend, $attrs);
 	}
 
 	/**
-	 * Does like the method above but instead of adding
-	 * css files to the end, it adds them to the start.
-	 * @access 	public
-	 * @param 	mixed 	string|strings or array.
-	 * @return 	object
-	 */
-	public function prepend_css()
-	{
-		if ( ! empty($css = func_get_args()))
-		{
-			is_array($css[0]) && $css = $css[0];
-			$css = $this->_remove_extension($css, '.css');
-			$this->css_files = array_merge($css, $this->css_files);
-		}
-
-		return $this;
-	}
-
-	/**
-	 * This method removes the given css files from the loaded ones
+	 * This method removes the given file from the loaded ones.
 	 * @access 	public
 	 * @param 	mixed 	string|strings or array
 	 * @return 	object
 	 */
-	public function remove_css()
+	public function remove_css($handle)
 	{
-		if ( ! empty($css = func_get_args()))
-		{
-			is_array($css[0]) && $css = $css[0];
-			$css = $this->_remove_extension($css, '.css');
-			$this->css_files = array_diff($this->css_files, $css);
-		}
-
-		return $this;
+		return $this->remove('css', $handle);
 	}
 
 	/**
-	 * This methods uses remove() then add(), ass simple as that
+	 * This method replaces any targetted file with a the new one.
 	 * @access 	public
 	 * @param 	string 	$old 	string
 	 * @param 	string 	$new 	string
 	 * @return 	object
 	 */
-	public function replace_css($old, $new)
+	public function replace_css($handle = null, $file = null, $ver = null)
 	{
-		// Always remove extension:
-		$old = $this->_remove_extension($old);
-		$new = $this->_remove_extension($new);
-
-		foreach ($this->css_files as $i => $css)
-		{
-			if ($old == $css)
-			{
-				$this->css_files[$i] = $new;
-			}
-		}
-
-		return $this;
+		return $this->replace('css', $file, $handle, $ver);
 	}
 
 	/**
@@ -705,82 +868,37 @@ class Theme
 	// ------------------------------------------------------------------------
 
 	/**
-	 * pushes js files to the js_files array
+	 * pushes a js file into to the js_files array
 	 * @access 	public
 	 * @param 	mixed 	string|strings or array
 	 * @return 	object
 	 */
-	public function add_js()
+	public function add_js($handle = '', $file = '', $ver = null, $prepend = false, array $attrs = array())
 	{
-		if ( ! empty($js = func_get_args()))
-		{
-			is_array($js[0]) && $js = $js[0];
-			$js = $this->_remove_extension($js, '.js');
-			$this->js_files = array_merge($this->js_files, $js);
-		}
-
-		return $this;
+		return $this->add('js', $file, $handle, $ver, $prepend, $attrs);
 	}
 
 	/**
-	 * Does like the method above but instead of adding
-	 * js files to the end, it adds them to the start.
-	 * @access 	public
-	 * @param 	mixed 	string|strings or array.
-	 * @return 	object
-	 */
-	public function prepend_js()
-	{
-		if ( ! empty($js = func_get_args()))
-		{
-			is_array($js[0]) && $js = $js[0];
-			$js = $this->_remove_extension($js, '.js');
-			$this->js_files = array_merge($js, $this->js_files);
-		}
-
-		return $this;
-	}
-
-	/**
-	 * This method removes the given js files from the loaded ones
+	 * This method removes the given file from the loaded ones.
 	 * @access 	public
 	 * @param 	mixed 	string|strings or array
 	 * @return 	object
 	 */
-	public function remove_js()
+	public function remove_js($handle)
 	{
-		if ( ! empty($js = func_get_args()))
-		{
-			is_array($js[0]) && $js = $js[0];
-			$js = $this->_remove_extension($js, '.js');
-			$this->js_files = array_diff($this->js_files, $js);
-		}
-
-		return $this;
+		return $this->remove('js', $handle);
 	}
 
 	/**
-	 * This methods uses remove() then add(), ass simple as that
+	 * This method replaces any targetted file with a the new one.
 	 * @access 	public
 	 * @param 	string 	$old 	string
 	 * @param 	string 	$new 	string
 	 * @return 	object
 	 */
-	public function replace_js($old, $new)
+	public function replace_js($handle = null, $file = null, $ver = null)
 	{
-		// Always remove extension:
-		$old = $this->_remove_extension($old);
-		$new = $this->_remove_extension($new);
-
-		foreach ($this->js_files as $i => $js)
-		{
-			if ($old == $js)
-			{
-				$this->js_files[$i] = $new;
-			}
-		}
-
-		return $this;
+		return $this->replace('js', $file, $handle, $ver);
 	}
 
 	/**
@@ -956,23 +1074,28 @@ class Theme
 	 */
 	protected function _output_css()
 	{
-		$css = array();
+		$output = '';
 		
-		foreach ($this->css_files as $file) 
+		foreach ($this->css_files as $handle => $file) 
 		{
-			// In case of an array, the first element is the local file
-			// while the second shoud be the CDN served file.
-			if (is_array($file)) 
+			if (isset($this->inline_css[$handle]))
 			{
-				$css[] = $this->css($file[0], $file[1]);
+				$output .= "<style type=\"text/css\">\n\t".$this->inline_css[$handle]."\n\t</style>"."\n\t";
+				unset($this->inline_css[$handle]);
 			}
-			else 
+			if (false !== $file)
 			{
-				$css[] = $this->css($file);
+				$output .= '<link '._stringify_attributes($file).'/>'."\n\t";
 			}
+
+		}
+
+		if ( ! empty($this->inline_css))
+		{
+			$output .= implode("\n\t", $this->inline_css);
 		}
 		
-		return implode("\t", $css);
+		return $output;
 	}
 
 	/**
@@ -983,23 +1106,29 @@ class Theme
 	 */
 	protected function _output_js()
 	{
-		$js = array();
+		$output = '';
 		
-		foreach ($this->js_files as $file) 
+		foreach ($this->js_files as $handle => $file) 
 		{
-			// In case of an array, the first element is the local file
-			// while the second shoud be the CDN served file.
-			if (is_array($file)) 
+			if (isset($this->inline_js[$handle]))
 			{
-				$js[] = $this->js($file[0], $file[1]);
+				$output .= $this->inline_js[$handle]."\n\t";
+				unset($this->inline_js[$handle]);
 			}
-			else 
+
+			if (false !== $file)
 			{
-				$js[] = $this->js($file);
+				$output .= '<script'._stringify_attributes($file).'></script>'."\n\t";
 			}
+			// $output .= "<script id=\"{$handle}\" type=\"text/javascript\" src=\"{$file}\"></script>"."\n\t";
+		}
+
+		if ( ! empty($this->inline_js))
+		{
+			$output .= implode("\n\t", $this->inline_js);
 		}
 		
-		return implode("\t", $js);
+		return $output;
 	}
 
 	/**
@@ -1173,6 +1302,24 @@ class Theme
 		{
 			include_once($this->theme_path.'functions.php');
 		}
+
+		/**
+		 * We now add our default JS files that can easily be
+		 * remove or replaced using provided helpers.
+		 */
+		$this->add_js(
+			'modernizr',
+			$this->common_url('js/modernizr-2.8.3.min'),
+			null,
+			true
+		);
+
+		$this->add_js(
+			'jquery',
+			$this->common_url('js/jquery-1.12.4.min'),
+			null,
+			true
+		);
 
 		// Always set page title
 		empty($this->title) && $this->title();
@@ -1484,6 +1631,7 @@ class Theme
 			"//&lt;![CDATA[\n".'\1'."\n//]]>"
 		), $output);
 	}
+
 }
 
 // ------------------------------------------------------------------------
@@ -2096,6 +2244,72 @@ if ( ! function_exists('print_flash_alert'))
 
         return null;
     }
+}
+
+// ------------------------------------------------------------------------
+
+/**
+ * This function is used inside 'functions.php' to enqueue files
+ */
+function add_style($handle = '', $file = '', $ver = null, $prepend = false, $attrs = array())
+{
+	return get_instance()->theme->add_css($handle, $file, $ver, $prepend, $attrs);
+}
+
+/**
+ * This function is used inside 'functions.php' to add inline style.
+ */
+function add_inline_style($handle, $content)
+{
+	return get_instance()->theme->add_inline('css', $content, $handle);
+}
+
+/**
+ * This function is used inside 'functions.php' to enqueue files
+ */
+function add_script($handle = '', $file = '', $ver = null, $prepend = false, $attrs = array())
+{
+	return get_instance()->theme->add_js($handle, $file, $ver, $prepend, $attrs);
+}
+
+/**
+ * This function is used inside 'functions.php' to add inline javascript
+ */
+function add_inline_script($handle, $content)
+{
+	return get_instance()->theme->add_inline('js', $content, $handle);
+}
+
+/**
+ * Removes a give file by its handle.
+ */
+function remove_style($handle)
+{
+	return get_instance()->theme->remove_css($handle);
+}
+
+/**
+ * Removes a give file by its handle.
+ */
+function remove_script($handle)
+{
+	return get_instance()->theme->remove_js($handle);
+}
+
+/**
+ * Simply replaces an existing file with another.
+ */
+function replace_style($handle = null, $file = null, $ver = null)
+{
+	return get_instance()->theme->replace_css($handle, $file, $ver);
+}
+
+/**
+ * Simply replaces an existing file with another.
+ */
+function replace_script($handle = null, $file = null, $ver = null)
+{
+	return get_instance()->theme->replace_js($handle, $file, $ver);
 }
 
 /* End of file Theme.php */

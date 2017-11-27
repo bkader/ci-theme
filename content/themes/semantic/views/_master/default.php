@@ -13,7 +13,6 @@
 	<link rel="apple-touch-icon" href="icon.png">
 
 	<!-- StyleSheets -->
-	<?php echo css('assets/css/semantic.min','https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.10/semantic.min.css'); ?>
 	<?php echo @$css_files; ?>
 
 	<!--[if lt IE 9]>
@@ -30,9 +29,6 @@
 	<?php echo @$layout; ?>
 
 	<!-- JavaScripts -->
-	<?php echo js('modernizr-2.8.3.min', 'https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js', null, 'common'); ?>
-	<?php echo js('http://code.jquery.com/jquery-1.12.4.min.js'); ?>
-	<?php echo js('assets/js/semantic.min', 'https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.10/semantic.min.js'); ?>
 	<?php echo @$js_files; ?>
 
 <?php if (config_item('ga_enabled') && (! empty(config_item('ga_siteid')) && config_item('ga_siteid') <> 'UA-XXXXX-Y')): ?>
