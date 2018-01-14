@@ -1,3 +1,5 @@
+.phpintel
+
 # remove application files & folder
 !.gitignore
 !LICENSE
@@ -15,6 +17,7 @@ application/hooks/*
 application/language/*
 application/libraries/*
 !application/libraries/Theme.php
+!application/libraries/Events.php
 application/logs/*
 application/models/*
 application/third_party/*
