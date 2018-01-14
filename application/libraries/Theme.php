@@ -1,5 +1,40 @@
 <?php
+/**
+ * CI-Theme Library
+ *
+ * This library makes your CodeIgniter applications themable.
+ *
+ * This content is released under the MIT License (MIT)
+ *
+ * Copyright (c) 2017 - 2018, Kader Bouyakoub <bkader@mail.com>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * @package 	CodeIgniter
+ * @author 		Kader Bouyakoub <bkader@mail.com>
+ * @copyright	Copyright (c) 2017 - 2018, Kader Bouyakoub <bkader@mail.com>
+ * @license 	http://opensource.org/licenses/MIT	MIT License
+ * @link 		https://github.com/bkader
+ * @since 		Version 1.0.0
+ */
 defined('BASEPATH') or exit('No direct script access allowed');
+
 defined('DS') or define('DS', DIRECTORY_SEPARATOR);
 /**
  * Theme Library
@@ -35,6 +70,24 @@ class Theme
 	);
 
 	/**
+	 * Holds the module's name.
+	 * @var string
+	 */
+	public $module = null;
+
+	/**
+	 * Holds the current controller's name.
+	 * @var string
+	 */
+	public $controller = null;
+
+	/**
+	 * Holds the current method's name.
+	 * @var string
+	 */
+	public $method = null;
+
+	/**
 	 * Page's additional CSS, JS & meta tags
 	 */
 	protected $css_files = array();
@@ -65,6 +118,9 @@ class Theme
 
 		// Make sure URL helper is load then we load our helper
 		(function_exists('base_url')) or $this->CI->load->helper('url');
+
+		// Load events library.
+		$this->CI->load->library('events');
 
 		// Add site details to views.
 		$this->set('lang_abbr', substr($this->CI->config->item('language'), 0, 2));
@@ -119,27 +175,6 @@ class Theme
 
 		// Now we replace our default config.
 		$this->config = array_merge($this->config, $config);
-
-		$this->theme_path = FCPATH."content/themes/{$this->theme}/";
-		
-		// Is the manifest present?
-		// Update: this is no longer important. If you have it
-		// you have, if not, who cares? :D
-		if (file_exists($this->theme_path.'/manifest.json'))
-		{
-			$manifest = file_get_contents($this->theme_path.'/manifest.json');
-			$manifest = json_decode($manifest, true);
-			if ( ! is_array($manifest))
-			{
-				show_error(
-					'The "manifest.json" provided with your theme is not valid..',
-					500,
-					'Error Manifest.json'
-				);
-			}
-
-			$this->config['manifest'] = $manifest;
-		}
 
 		// Create class properties.
 		foreach ($this->config as $key => $val)
@@ -242,10 +277,14 @@ class Theme
 			// UPDATE
 			// You now have the possiblity to even get element from
 			// theme manifest, like author, description, website...
-
-			if (isset($this->config['manifest']) && isset($this->config['manifest'][$name]))
+			if (file_exists($this->theme_path('manifest.json')))
 			{
-				return $this->config['manifest'][$name];
+				$manifest = file_get_contents($this->theme_path('manifest.json'));
+				$manifest = json_decode($manifest, true);
+				if (is_array($manifest) && isset($manifest[$name]))
+				{
+					return $manifest[$name];
+				}
 			}
 
 			return null;
@@ -492,7 +531,7 @@ class Theme
 	 */
 	public function theme_path($uri = '')
 	{
-		return realpath($this->theme_path.$uri);
+		return realpath(FCPATH.'content/themes/'.$this->theme.'/'.$uri);
 	}
 
 	/**
@@ -957,6 +996,8 @@ class Theme
 	protected function _output_css()
 	{
 		$css = array();
+
+		Events::trigger('enqueue_styles');
 		
 		foreach ($this->css_files as $file) 
 		{
@@ -984,6 +1025,8 @@ class Theme
 	protected function _output_js()
 	{
 		$js = array();
+
+		Events::trigger('enqueue_scripts');
 		
 		foreach ($this->js_files as $file) 
 		{
@@ -1013,6 +1056,8 @@ class Theme
 	protected function _output_meta()
 	{
 		$output = '';
+
+		Events::trigger('enqueue_metadata');
 
 		if ( ! empty($this->metadata))
 		{
@@ -1169,9 +1214,9 @@ class Theme
 	protected function _build_theme_output($view, $data = array())
 	{
 		// Does the theme have functions.php file?
-		if (file_exists($this->theme_path.'functions.php'))
+		if (file_exists($this->theme_path('functions.php')))
 		{
-			include_once($this->theme_path.'functions.php');
+			include($this->theme_path('functions.php'));
 		}
 
 		// Always set page title
@@ -1197,6 +1242,9 @@ class Theme
 
 		// Set page layout and put content in it
 		$layout = array();
+
+		// Enqueue partials event.
+		Events::trigger('enqueue_partials');
 
 		// Add partial views only if requested
 		if ( ! empty($this->partials)) 
@@ -1707,6 +1755,60 @@ if ( ! function_exists('css'))
     }
 }
 
+if ( ! function_exists('add_style'))
+{
+	/**
+	 * Enqueue a single or multiple style sheet.
+	 */
+	function add_style()
+	{
+		return call_user_func_array(
+			array(get_instance()->theme, 'add_css'),
+			func_get_args()
+		);
+	}
+}
+
+if ( ! function_exists('prepend_style'))
+{
+	/**
+	 *  Prepend StyleSheets
+	 */
+	function prepend_style()
+	{
+		return call_user_func_array(
+			array(get_instance()->theme, 'prepend_css'),
+			func_get_args()
+		);
+	}
+}
+
+if ( ! function_exists('remove_style'))
+{
+	/**
+	 * Remove StyleSheets
+	 */
+	function remove_style()
+	{
+		return call_user_func_array(
+			array(get_instance()->theme, 'remove_css'),
+			func_get_args()
+		);
+	}
+}
+
+if ( ! function_exists('replace_style'))
+{
+	/**
+	 * Replace a CSS file by another
+	 */
+
+	function replace_style($old, $new)
+	{
+		return get_instance()->theme->replace_css($old, $new);
+	}
+}
+
 // ----------------------------------------------------------------------------
 
 if ( ! function_exists('js_url'))
@@ -1737,7 +1839,78 @@ if ( ! function_exists('js'))
     }
 }
 
+if ( ! function_exists('add_script'))
+{
+	/**
+	 * Enqueue a single or multiple script sheet.
+	 */
+	function add_script()
+	{
+		return call_user_func_array(
+			array(get_instance()->theme, 'add_js'),
+			func_get_args()
+		);
+	}
+}
+
+if ( ! function_exists('prepend_script'))
+{
+	/**
+	 *  Prepend Scripts
+	 */
+	function prepend_script()
+	{
+		return call_user_func_array(
+			array(get_instance()->theme, 'prepend_js'),
+			func_get_args()
+		);
+	}
+}
+
+if ( ! function_exists('remove_script'))
+{
+	/**
+	 * Remove Scripts
+	 */
+	function remove_script()
+	{
+		return call_user_func_array(
+			array(get_instance()->theme, 'remove_js'),
+			func_get_args()
+		);
+	}
+}
+
+if ( ! function_exists('replace_style'))
+{
+	/**
+	 * Replace a CSS file by another
+	 */
+
+	function replace_style($old, $new)
+	{
+		return get_instance()->theme->replace_js($old, $new);
+	}
+}
+
 // ------------------------------------------------------------------------
+
+if ( ! function_exists('add_meta'))
+{
+	/**
+	 * Appends meta tags
+	 * @access 	public
+	 * @param 	mixed 	$name 	meta tag's name
+	 * @param 	mixed 	$content
+	 * @param 	string 	$type
+	 * @param 	mixed 	$attrs
+	 * @return 	object
+	 */
+    function add_meta($name, $content = null, $type = 'meta', $attrs = array())
+    {
+    	return get_instance()->theme->add_meta($name, $content, $type, $attrs);
+    }
+}
 
 if ( ! function_exists('meta'))
 {
@@ -1959,6 +2132,36 @@ if ( ! function_exists('theme_partial'))
     }
 }
 
+if ( ! function_exists('add_partial'))
+{
+	// Enqueue partial.
+	function add_partial($view, $data = array(), $name = null)
+	{
+		return get_instance()->theme->add_partial($view, $data, $name);
+	}
+}
+
+if ( ! function_exists('remove_partial'))
+{
+	// Remove partials.
+	function remove_partial()
+	{
+		return call_user_func_array(
+			array(get_instance()->theme, 'remove_partial'),
+			func_get_args()
+		);
+	}
+}
+
+if ( ! function_exists('replace_partial'))
+{
+	// Replace partial.
+	function replace_partial($old, $new, $data = array())
+	{
+		return get_instance()->theme->replace_partial($old, $new, $data);
+	}
+}
+
 // ------------------------------------------------------------------------
 
 if ( ! function_exists('theme_header'))
@@ -2096,6 +2299,79 @@ if ( ! function_exists('print_flash_alert'))
 
         return null;
     }
+}
+
+/*=================================================================
+=            MODULES, CONTROLLERS AND METHODS CHECKERS            =
+=================================================================*/
+
+if ( ! function_exists('is_module'))
+{
+	/**
+	 * Checks if the page belongs to a given module.
+	 * If no argument is passed, it checks if we are
+	 * using a module.
+	 * You may pass a single string, mutliple comma-
+	 * separated string or an array.
+	 * @param   string|array.
+	 */
+	function is_module($modules = null)
+	{
+		if ($modules === null)
+		{
+			return (get_instance()->theme->module !== null);
+		}
+		
+		/**
+		 * Doing the following makes it possible to
+		 * check for multiple modules.
+		 */
+		if ( ! is_array($modules))
+		{
+			$modules = array_map('trim', explode(',', $modules));
+		}
+		
+		// Compare between modules names.
+		return (in_array(get_instance()->theme->module, $modules));
+	}
+}
+
+// --------------------------------------------------------------------
+
+if ( ! function_exists('is_controller'))
+{
+	/**
+	 * Checks if the page belongs to a given controller.
+	 */
+	function is_controller($controllers = null)
+	{
+		if ( ! is_array($controllers))
+		{
+			$controllers = array_map('trim', explode(',', $controllers));
+		}
+		
+		// Compare between controllers names.
+		return (in_array(get_instance()->theme->controller, $controllers));
+	}
+}
+
+// --------------------------------------------------------------------
+
+if ( ! function_exists('is_method'))
+{
+	/**
+	 * Checks if the page belongs to a given method.
+	 */
+	function is_method($methods = null)
+	{
+		if ( ! is_array($methods))
+		{
+			$methods = array_map('trim', explode(',', $methods));
+		}
+		
+		// Compare between methods names.
+		return (in_array(get_instance()->theme->method, $methods));
+	}
 }
 
 /* End of file Theme.php */

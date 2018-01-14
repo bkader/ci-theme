@@ -1,19 +1,15 @@
 <!DOCTYPE html>
-<html class="<?php echo @$html_class ?: 'no-js'; ?>" lang="<?php echo @$lang_abbr ?: 'en'; ?>">
+<html class="<?php echo Events::trigger('html_class', 'no-js', 'string'); ?>" lang="<?php echo @$lang_abbr ?: 'en'; ?>">
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="x-ua-compatible" content="ie=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<base href="<?php echo base_url(); ?>">
-	<title><?php echo @$title; ?></title>
+	<title><?php echo Events::trigger('the_title', $title, 'string'); ?></title>
 	<link rel="icon" href="<?php echo base_url('favicon.ico'); ?>">
 	<?php echo @$metadata; ?>
 
-	<link rel="manifest" href="site.webmanifest">
-	<link rel="apple-touch-icon" href="icon.png">
-
 	<!-- StyleSheets -->
-	<?php echo css('assets/css/semantic.min','https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.10/semantic.min.css'); ?>
 	<?php echo @$css_files; ?>
 
 	<!--[if lt IE 9]>
@@ -22,7 +18,7 @@
 	<![endif]-->
 
 </head>
-<body class="<?php echo @$body_class; ?>">
+<body class="<?php echo Events::trigger('body_class', '', 'string'); ?>">
     <!--[if lte IE 9]>
         <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
     <![endif]-->
@@ -31,8 +27,8 @@
 
 	<!-- JavaScripts -->
 	<?php echo js('modernizr-2.8.3.min', 'https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js', null, 'common'); ?>
-	<?php echo js('http://code.jquery.com/jquery-1.12.4.min.js'); ?>
-	<?php echo js('assets/js/semantic.min', 'https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.10/semantic.min.js'); ?>
+    <script src="http://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script>window.jQuery || document.write('<script src="<?php echo js_url('jquery-1.12.4.min', 'common'); ?>"><\/script>')</script>
 	<?php echo @$js_files; ?>
 
 <?php if (config_item('ga_enabled') && (! empty(config_item('ga_siteid')) && config_item('ga_siteid') <> 'UA-XXXXX-Y')): ?>
