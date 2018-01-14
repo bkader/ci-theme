@@ -1,6 +1,12 @@
 # CodeIgniter Theme Library
 There are plenty of CodeIgniter template library. I tried most of them and I must say that they rock. Though, I had to make my own that suits my needs and that may be easy to implement, easy to understand and easy to use.
 
+### UPDATED (2018/01/14 @ 05:00 AM).  
+I have added [Event](https://github.com/ericbarnes/CodeIgniter-Events) so themes would be able to enqueue their own CSS files, JS files an meta tags. They can even manipulate html and body classes.  
+This is the first part of it, other things will be added later. You register as many events as you want as long as you trigger them in the library.  
+To see how it's done, go the provided themes **functions.php** files ([default](https://github.com/bkader/ci-theme/blob/acb698e766475286ce941bcb5b8f2037ad0c8ae1/content/themes/default/functions.php#L56) and [semantic](https://github.com/bkader/ci-theme/blob/acb698e766475286ce941bcb5b8f2037ad0c8ae1/content/themes/semantic/functions.php#L55)) to see how it's done.  
+Don't forget to take a look at master view files as well([default](https://github.com/bkader/ci-theme/blob/master/content/themes/default/views/_master/default.php) and [semantic](https://github.com/bkader/ci-theme/blob/master/content/themes/semantic/views/_master/default.php)).
+
 ### UPDATED  
 **assets_url()** removed because it was kind of useless but the following methods were added:  
 * get_theme_url()
@@ -95,7 +101,7 @@ CI-Theme library looks for views in a particular order so that everything can be
 1. themes/**theme_name**/views/_modules/**module_name**/_layouts/
 3. themes/**theme_name**/views/_layouts/
 4. **module_location**/**module_name**/views/_layouts/
-5. **views_path**/_layouts/
+5. **views_path**/_layouts/.
 
 #### Master View:
 The master view is named **default.php** by default but it can be overridden (4th parameter of Theme::load()).
@@ -138,4 +144,4 @@ There is a short version of all this but in case you want to add partial views y
 Feel free to explore the library to know more about it and if you have any questions, I am here to answer as long as I am still alive.
 
 #CREDITS
-All credits go to their respective owners: **CodeIgniter**, **Bootstrap** and **Semantic-UI**. (and some of it for my work :D)
+All credits go to their respective owners: **CodeIgniter**, **Bootstrap**, **Semantic-UI** and **Ericbarnes**. (and some of it for my work :D)
